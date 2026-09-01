@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "sourceType": "github",
+      "skillPath": "skills/agent-browser/SKILL.md",
+      "computedHash": "a674b7d81066e3cc471a7512ddb4ae724418cbfefa75cbb050b0dc430e4d57a0"
+    },
+    "anti-ui-slop": {
+      "source": "uizze.com",
+      "sourceUrl": "https://uizze.com/",
+      "sourceType": "well-known",
+      "computedHash": "cdb9293f9d8461b525a42949d5f3509754c42efa2eab11f20d406b16270eb867",
+      "wellKnownDigest": "sha256:c3dc1a035894db5e60d3cde5e06147c660220f1cffacf8b7469b80f12309bc08"
+    },
+    "design-taste-frontend": {
+      "source": "leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "899b84384f74f540ea5284d9b2e9234e050998b42eacc805410b518d4226c0b3"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "b146008599c31057cef1c145774cea5d5afb30e8f43fa802e47a4b461419aaaf"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "93f53fd1c0352d3d7ec17b8f73d7351bf76f4821e55d123c9d2abc2c53ba48e4"
+    },
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/grill-me/SKILL.md",
+      "computedHash": "5e0c683385eafd83f106ac6c9d67dfbbfe5aa4b3fe65aad114eb1055a99c818f"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "ce6cef1f4c7fd1599bc78cd87101d2cee21d0a0a9042cfe7d574f719bb40ebe1"
+    },
+    "ui-design": {
+      "source": "uizze.com",
+      "sourceUrl": "https://uizze.com/",
+      "sourceType": "well-known",
+      "computedHash": "fe14d1158abb50fdece6abe03ade1d8d6d5b2ef8b7f6914d65193a30a3d48712",
+      "wellKnownDigest": "sha256:31db513e7c2d956be22792661e840c44cee474f220d2cce885fa93333a0e8bae"
+    },
+    "ui-radar": {
+      "source": "uizze.com",
+      "sourceUrl": "https://uizze.com/",
+      "sourceType": "well-known",
+      "computedHash": "34305420bba52f3fe7d1d3b2dd355b64ccf12de7411cbbf4557a1231e8ef8ddb",
+      "wellKnownDigest": "sha256:461cf4d25b9e74840cb6f20ab81751ec5352dbcb28dac8e3bce001602965279e"
+    }
+  }
+}

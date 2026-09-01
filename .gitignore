@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -34,3 +32,27 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase
+.supabase/
+
+# sentry
+.sentry-cli/
+
+# docs (if built, otherwise keep src)
+/docs/build
+
+# next-pwa
+/.pwa
+
+# environment variables (also included in .env*.local above)
+.env
+
+# biome / prettier cache
+node_modules/.cache/
+
+# git ignore for all os
+### Environment variables please don't delete ###
+# If you don't want to enable eslint or stylelint, just delete these files and the config in package.json
+.eslintrc.json
+prettier.config.js
