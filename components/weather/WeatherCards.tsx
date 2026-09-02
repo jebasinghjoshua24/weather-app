@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { wmoToDescription } from "@/lib/open-meteo";
-import { usePreferencesStore, toDisplayTemp, tempLabel } from "@/store/usePreferencesStore";
+import { formatTemp, usePreferencesStore } from "@/store/usePreferencesStore";
 import type { WeatherResponse } from "@/lib/open-meteo";
 
 export function CurrentWeatherCard({ data, name, pending, error }: { data?: WeatherResponse; name: string; pending: boolean; error: boolean }) {
@@ -14,9 +14,9 @@ export function CurrentWeatherCard({ data, name, pending, error }: { data?: Weat
     <Card className="max-w-md">
       <CardHeader><CardTitle>{name} — {wmoToDescription(c.weatherCode)}</CardTitle></CardHeader>
       <CardContent className="space-y-1">
-        <p className="text-4xl font-bold">{Math.round(toDisplayTemp(c.temperature, unit))}{tempLabel(unit)}</p>
-        <p className="text-sm text-muted-foreground">Wind {Math.round(c.windSpeed)} km/h · {c.isDay ? "Day" : "Night"}</p>
-        <p className="text-xs text-muted-foreground">{new Date(c.time).toLocaleString(undefined, { timeZone: data.timezone })}</p>
+        <p className="text-4xl font-bold">{formatTemp(c.temperature, unit)}</p>
+        <p className="text-sm text-muted-foreground">Wind {Number.isFinite(c.windSpeed) ? Math.round(c.windSpeed) : "--"} km/h · {c.isDay ? "Day" : "Night"}</p>
+        <p className="text-xs text-muted-foreground">{c.time ? new Date(c.time).toLocaleString(undefined, { timeZone: data.timezone }) : "--"}</p>
       </CardContent>
     </Card>
   );
@@ -38,7 +38,7 @@ export function HourlyForecastRow({ data }: { data?: WeatherResponse }) {
           <Card key={time} className="min-w-24">
             <CardContent className="p-3 text-center">
               <p className="text-xs text-muted-foreground">{new Date(time).toLocaleTimeString(undefined, { hour: "2-digit" })}</p>
-              <p className="font-semibold">{Math.round(toDisplayTemp(temp, unit))}{tempLabel(unit)}</p>
+              <p className="font-semibold">{formatTemp(temp, unit)}</p>
               <p className="text-xs">{wmoToDescription(code)}</p>
             </CardContent>
           </Card>

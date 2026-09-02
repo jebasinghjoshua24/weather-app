@@ -44,8 +44,13 @@ export const usePreferencesStore = create<PreferencesState>()(
 );
 
 // ── Helper: convert at the render boundary ──
-export function toDisplayTemp(celsius: number, unit: TemperatureUnit): number {
-  return unit === "fahrenheit" ? (celsius * 9) / 5 + 32 : celsius;
+export function toDisplayTemp(celsius: number | null | undefined, unit: TemperatureUnit): number {
+  const c = typeof celsius === "number" && Number.isFinite(celsius) ? celsius : 0;
+  return unit === "fahrenheit" ? (c * 9) / 5 + 32 : c;
+}
+export function formatTemp(celsius: number | null | undefined, unit: TemperatureUnit): string {
+  if (celsius == null || !Number.isFinite(celsius)) return "--";
+  return `${Math.round(toDisplayTemp(celsius, unit))}${tempLabel(unit)}`;
 }
 export function tempLabel(unit: TemperatureUnit): string {
   return unit === "fahrenheit" ? "°F" : "°C";
