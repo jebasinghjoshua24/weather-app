@@ -57,13 +57,14 @@ export interface GeocodeResult {
   timezone?: string;
 }
 
-// ── Fetcher (server-side or client-side friendly) ──
+// ── Low-level fetch (no Next cache here — route handlers own caching) ──
 async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
   return res.json() as Promise<T>;
 }
 
+/** Client helper — prefer /api/weather (proxied + cached) via useWeatherData. */
 export async function fetchWeather(lat: number, lon: number): Promise<WeatherResponse> {
   const params = new URLSearchParams({
     latitude: String(lat),
@@ -77,6 +78,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherRes
   return fetchJson<WeatherResponse>(`${OPEN_METEO_BASE}/forecast?${params}`);
 }
 
+/** Client helper — prefer useSearchAutocomplete (/api/geocode, debounced) */
 export async function geocodeSearch(query: string, count = 5): Promise<GeocodeResult[]> {
   const params = new URLSearchParams({ name: query, count: String(count), language: "en", format: "json" });
   const data = await fetchJson<{ results?: GeocodeResult[] }>(`${OPEN_METEO_GEOCODE}/search?${params}`);

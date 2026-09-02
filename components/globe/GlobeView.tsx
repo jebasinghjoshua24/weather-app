@@ -1,0 +1,1 @@
+export function GlobeView() { return <div data-testid="globe-stub" />; }

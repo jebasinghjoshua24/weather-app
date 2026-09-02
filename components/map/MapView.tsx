@@ -1,0 +1,1 @@
+export function MapView() { return <div data-testid="map-stub" />; }

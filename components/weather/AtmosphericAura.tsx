@@ -1,0 +1,1 @@
+export function AtmosphericAura() { return <div data-testid="aura-stub" />; }

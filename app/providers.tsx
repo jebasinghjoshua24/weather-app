@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
-import { usePreferencesStore } from "@/store/usePreferencesStore";
+
 
 /**
  * Global providers: React Query (server data cache) + next-themes (dark mode).
@@ -29,18 +29,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  const theme = usePreferencesStore((s) => s.theme);
-
   return (
     <QueryClientProvider client={client}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        value={{ light: "light", dark: "dark", system: "system" }}
-        forcedTheme={theme === "system" ? undefined : theme}
-        enableSystem
-        disableTransitionOnChange
-      >
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         {children}
       </ThemeProvider>
     </QueryClientProvider>

@@ -1,0 +1,1 @@
+export function RadarView() { return <div data-testid="radar-stub" />; }
