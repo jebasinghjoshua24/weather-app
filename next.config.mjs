@@ -22,7 +22,7 @@ const nextConfig = {
               // Styles: allow self + inline styles (next.js + tailwind)
               "style-src 'self' 'unsafe-inline'",
               // Images: allow self + OSM tiles + RainViewer + YouTube + Open-Meteo placeholders
-              "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tilecache.rainviewer.com https://i.ytimg.com https://img.youtube.com https://openstreetmap.org",
+              "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tilecache.rainviewer.com https://unpkg.com https://i.ytimg.com https://img.youtube.com https://openstreetmap.org",
               // Fonts: self-hosted via next/font
               "font-src 'self'",
               // Connect: APIs we talk to directly (open-meteo is direct, not proxied)
@@ -50,9 +50,9 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "geolocation=(self), microphone=(self), camera=(), display-capture=(), fullscreen=()",
           },
-          // Cross-Origin: prevent cross-origin attacks
+          // Cross-Origin: prevent cross-origin attacks (credentialless allows OSM tiles without CORP)
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+          { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
           { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
         ],
       },
