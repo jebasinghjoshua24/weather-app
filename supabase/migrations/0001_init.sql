@@ -130,17 +130,17 @@ begin
 end;
 $$;
 
-do $$
+do $do_block$
 begin
   if exists (select 1 from pg_extension where extname = 'pg_cron') then
     perform cron.schedule(
       'purge-old-weather-history',
       '0 3 * * *',
-      $$select public.purge_old_weather_history()$$
+      'select public.purge_old_weather_history()'
     );
   end if;
 end;
-$$;
+$do_block$;
 
 -- =============================================================
 -- 5. GDPR erasure: deleting the auth user cascades to all their data

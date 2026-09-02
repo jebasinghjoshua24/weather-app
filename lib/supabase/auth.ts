@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 /**
  * Auth helpers for Route Handlers + Server Components.
@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
  * Safe for Server Components and Route Handlers. Never throws.
  */
 export async function getCurrentUser() {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -36,7 +36,7 @@ export async function requireUser() {
  * Use at the top of protected Route Handlers (/api/diary, /api/saved-locations, etc.)
  */
 export async function getAuthedClientOr401() {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
