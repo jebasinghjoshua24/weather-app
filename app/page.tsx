@@ -9,6 +9,7 @@ import { DEFAULT_LOCATION } from "@/lib/constants";
 import { SearchBar } from "@/components/weather/SearchBar";
 import { CurrentWeatherCard, HourlyForecastRow } from "@/components/weather/WeatherCards";
 import { RegionalClock } from "@/components/weather/RegionalClock";
+import { NewsFeed } from "@/components/weather/NewsFeed";
 import { LazyMap } from "@/lib/feature-registry";
 import { Button } from "@/components/ui/button";
 
@@ -60,6 +61,7 @@ export default function HomePage() {
           <RegionalClock timeZone={data?.timezone ?? location.timezone} name={name} />
           {data && <HourlyForecastRow data={data} />}
           <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
+          <NewsFeed country={location.country ?? null} />
         </>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
