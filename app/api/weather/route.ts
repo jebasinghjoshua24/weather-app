@@ -35,8 +35,41 @@ export async function GET(request: Request) {
   if (!res.ok) {
     return NextResponse.json({ error: "Upstream weather unavailable" }, { status: 502 });
   }
-  const data = await res.json();
-  return NextResponse.json(data, {
+  const raw = (await res.json()) as Record<string, unknown>;
+  // Map Open-Meteo raw keys (temperature_2m, wind_speed_10m…) to our friendly shape
+  const c = (raw.current ?? {}) as Record<string, unknown>;
+  const h = (raw.hourly ?? {}) as Record<string, unknown>;
+  const d = (raw.daily ?? {}) as Record<string, unknown>;
+  const mapped = {
+    latitude: raw.latitude,
+    longitude: raw.longitude,
+    timezone: raw.timezone ?? "UTC",
+    current: {
+      temperature: c.temperature_2m ?? c.temperature,
+      windSpeed: c.wind_speed_10m ?? c.windSpeed,
+      windDirection: c.wind_direction_10m ?? c.windDirection,
+      weatherCode: c.weather_code ?? c.weatherCode,
+      isDay: c.is_day ?? c.isDay,
+      time: c.time,
+    },
+    hourly: {
+      time: h.time ?? [],
+      temperature: h.temperature_2m ?? h.temperature ?? [],
+      weatherCode: h.weather_code ?? h.weatherCode ?? [],
+      precipitation: h.precipitation ?? [],
+      humidity: h.relative_humidity_2m ?? h.humidity ?? [],
+      windSpeed: h.wind_speed_10m ?? h.windSpeed ?? [],
+    },
+    daily: {
+      time: d.time ?? [],
+      weatherCode: d.weather_code ?? d.weatherCode ?? [],
+      tempMax: d.temperature_2m_max ?? d.tempMax ?? [],
+      tempMin: d.temperature_2m_min ?? d.tempMin ?? [],
+      sunrise: d.sunrise ?? [],
+      sunset: d.sunset ?? [],
+    },
+  };
+  return NextResponse.json(mapped, {
     headers: {
       "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       "CDN-Cache-Control": "public, s-maxage=600",

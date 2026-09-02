@@ -64,6 +64,41 @@ async function fetchJson<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function mapRawToWeather(raw: Record<string, unknown>): WeatherResponse {
+  const c = (raw.current ?? {}) as Record<string, unknown>;
+  const h = (raw.hourly ?? {}) as Record<string, unknown>;
+  const d = (raw.daily ?? {}) as Record<string, unknown>;
+  return {
+    latitude: raw.latitude as number,
+    longitude: raw.longitude as number,
+    timezone: (raw.timezone as string) ?? "UTC",
+    current: {
+      temperature: (c.temperature_2m ?? c.temperature) as number,
+      windSpeed: (c.wind_speed_10m ?? c.windSpeed) as number,
+      windDirection: (c.wind_direction_10m ?? c.windDirection) as number,
+      weatherCode: (c.weather_code ?? c.weatherCode) as number,
+      isDay: (c.is_day ?? c.isDay) as number,
+      time: c.time as string,
+    },
+    hourly: {
+      time: (h.time as string[]) ?? [],
+      temperature: (h.temperature_2m ?? h.temperature ?? []) as number[],
+      weatherCode: (h.weather_code ?? h.weatherCode ?? []) as number[],
+      precipitation: (h.precipitation as number[]) ?? [],
+      humidity: (h.relative_humidity_2m ?? h.humidity ?? []) as number[],
+      windSpeed: (h.wind_speed_10m ?? h.windSpeed ?? []) as number[],
+    },
+    daily: {
+      time: (d.time as string[]) ?? [],
+      weatherCode: (d.weather_code ?? d.weatherCode ?? []) as number[],
+      tempMax: (d.temperature_2m_max ?? d.tempMax ?? []) as number[],
+      tempMin: (d.temperature_2m_min ?? d.tempMin ?? []) as number[],
+      sunrise: (d.sunrise as string[]) ?? [],
+      sunset: (d.sunset as string[]) ?? [],
+    },
+  };
+}
+
 /** Client helper — prefer /api/weather (proxied + cached) via useWeatherData. */
 export async function fetchWeather(lat: number, lon: number): Promise<WeatherResponse> {
   const params = new URLSearchParams({
@@ -75,7 +110,8 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherRes
     timezone: "auto",
     forecast_days: "7",
   });
-  return fetchJson<WeatherResponse>(`${OPEN_METEO_BASE}/forecast?${params}`);
+  const raw = await fetchJson<Record<string, unknown>>(`${OPEN_METEO_BASE}/forecast?${params}`);
+  return mapRawToWeather(raw);
 }
 
 /** Client helper — prefer useSearchAutocomplete (/api/geocode, debounced) */
