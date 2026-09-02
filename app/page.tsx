@@ -10,7 +10,9 @@ import { SearchBar } from "@/components/weather/SearchBar";
 import { CurrentWeatherCard, HourlyForecastRow } from "@/components/weather/WeatherCards";
 import { RegionalClock } from "@/components/weather/RegionalClock";
 import { NewsFeed } from "@/components/weather/NewsFeed";
+import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
 import { LazyMap } from "@/lib/feature-registry";
+import type { EonetEvent } from "@/lib/eonet";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
@@ -39,6 +41,14 @@ export default function HomePage() {
   const lon = location?.lon ?? null;
   const name = location?.name ?? DEFAULT_LOCATION.name;
   const { data, isPending, isError } = useWeatherData(lat, lon);
+  const handleFlyTo = (ev: EonetEvent) => {
+    const g = ev.geometry[0];
+    if (!g) return;
+    const pos = Array.isArray(g.coordinates) && typeof g.coordinates[0] === "number"
+      ? { lat: (g.coordinates as number[])[1], lon: (g.coordinates as number[])[0] }
+      : null;
+    if (pos) setLocation({ lat: pos.lat, lon: pos.lon, name: ev.title });
+  };
 
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 p-4 md:p-8">
@@ -60,6 +70,7 @@ export default function HomePage() {
           <CurrentWeatherCard data={data} name={name} pending={isPending} error={isError} />
           <RegionalClock timeZone={data?.timezone ?? location.timezone} name={name} />
           {data && <HourlyForecastRow data={data} />}
+          <DisasterAlerts location={lat != null && lon != null ? { lat, lon } : null} onFlyTo={handleFlyTo} />
           <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
           <NewsFeed country={location.country ?? null} />
         </>

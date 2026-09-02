@@ -33,16 +33,21 @@ function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lon: number) =
   return null;
 }
 
+import type { EonetEvent } from "@/lib/eonet";
+import { eventLatLon } from "@/lib/eonet";
+
 export function MapView({
   lat,
   lon,
   name,
   onPick,
+  disasters = [],
 }: {
   lat: number;
   lon: number;
   name: string;
   onPick: (lat: number, lon: number, name: string) => void;
+  disasters?: EonetEvent[];
 }) {
   const [clickPos, setClickPos] = useState<{ lat: number; lon: number } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -84,6 +89,15 @@ export function MapView({
         <Marker position={[lat, lon]}>
           <Popup>{name}</Popup>
         </Marker>
+        {disasters.map((ev) => {
+          const pos = eventLatLon(ev);
+          if (!pos) return null;
+          return (
+            <Marker key={ev.id} position={[pos.lat, pos.lon]}>
+              <Popup>{ev.title}</Popup>
+            </Marker>
+          );
+        })}
         <FlyTo lat={lat} lon={lon} />
         <ClickHandler onMapClick={handleMapClick} />
       </MapContainer>
