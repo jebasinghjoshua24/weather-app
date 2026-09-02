@@ -9,6 +9,7 @@ import { DEFAULT_LOCATION } from "@/lib/constants";
 import { SearchBar } from "@/components/weather/SearchBar";
 import { CurrentWeatherCard, HourlyForecastRow } from "@/components/weather/WeatherCards";
 import { RegionalClock } from "@/components/weather/RegionalClock";
+import { LazyMap } from "@/lib/feature-registry";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
@@ -58,7 +59,7 @@ export default function HomePage() {
           <CurrentWeatherCard data={data} name={name} pending={isPending} error={isError} />
           <RegionalClock timeZone={data?.timezone ?? location.timezone} name={name} />
           {data && <HourlyForecastRow data={data} />}
-          <p className="text-xs text-muted-foreground">Map (Feature 4) placeholder — Leaflet view ships next behind FEATURES.map flag.</p>
+          <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
         </>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">

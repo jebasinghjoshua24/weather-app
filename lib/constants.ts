@@ -40,8 +40,8 @@ export const SUPABASE_TABLES = {
 export const FEATURES = {
   localWeather: true,
   search: true,
-  hourlyForecast: false,
-  map: false,
+  hourlyForecast: true,
+  map: true,
   clock: false,
   news: false,
   eonet: false,
