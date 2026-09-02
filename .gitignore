@@ -50,9 +50,3 @@ next-env.d.ts
 
 # biome / prettier cache
 node_modules/.cache/
-
-# git ignore for all os
-### Environment variables please don't delete ###
-# If you don't want to enable eslint or stylelint, just delete these files and the config in package.json
-.eslintrc.json
-prettier.config.js

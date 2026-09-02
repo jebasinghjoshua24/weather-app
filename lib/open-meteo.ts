@@ -4,7 +4,7 @@
  * If Open-Meteo fields change, we fix them here once.
  */
 
-import { OPEN_METEO_BASE, OPEN_METEO_GEOCODE, CACHE_TTL } from "./constants";
+import { OPEN_METEO_BASE, OPEN_METEO_GEOCODE } from "./constants";
 
 // ── Types ──
 export type WeatherCode = number; // 0-99 per WMO

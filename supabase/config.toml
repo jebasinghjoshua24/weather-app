@@ -1,0 +1,28 @@
+[project]
+name = "weather-app"
+# Region: Mumbai, India (ap-south-1)
+# Why: user chose Asia-Pacific for data residency. This is an Edge/Multi-Region
+# Supabase project — data is stored in Mumbai, served globally via CDN.
+region = "ap-south-1"
+
+[auth]
+enabled = true
+# Allow email + Google + GitHub sign-in
+providers = ["email", "google", "github"]
+
+[auth.email]
+enable_confirmations = true
+enable_autoconfirm = false
+secure_password_change = true
+
+[api]
+# Restrict access to our application origins
+# Override with your actual domain in production
+extra_search_path = "public"
+max_rows = 1000
+
+[storage]
+enabled = false
+
+[analytics]
+enabled = false

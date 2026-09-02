@@ -1,0 +1,33 @@
+# Dependabot — automated dependency updates + security fixes
+# Location: MUST be .github/dependabot.yml (this is what GitHub reads)
+version: 2
+updates:
+  # npm dependencies (the app)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automerge"
+    versioning-strategy: "auto"
+    # Only security updates + minor/patch by default
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions (the CI workflows themselves)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    labels:
+      - "ci"
+      - "dependencies"

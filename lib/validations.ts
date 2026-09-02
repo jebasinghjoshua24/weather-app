@@ -37,14 +37,21 @@ export const diaryEntrySchema = z.object({
   locationName: z.string().min(1).max(100),
   lat: z.number().min(-90).max(90),
   lon: z.number().min(-180).max(180),
-  snapshot: z.record(z.unknown()), // validated loosely; typed elsewhere
+  snapshot: z.record(z.string(), z.unknown()).refine((v) => JSON.stringify(v).length < 10000, {
+    message: "Snapshot too large",
+  }), // validated loosely; typed elsewhere
   mood: z.string().max(200).optional(),
   note: z.string().max(500).optional(),
 });
 
 // ── Saved location ──
 export const savedLocationSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z
+    .string()
+    .trim()
+    .min(1)
+    .max(100)
+    .regex(/^[\p{L}\p{N}\s,\-'.]+$/u, "Name contains invalid characters"),
   lat: z.number().min(-90).max(90),
   lon: z.number().min(-180).max(180),
   isFavorite: z.boolean().optional(),
