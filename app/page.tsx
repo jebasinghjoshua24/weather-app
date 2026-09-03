@@ -9,6 +9,7 @@ import { DEFAULT_LOCATION } from "@/lib/constants";
 import { SearchBar } from "@/components/weather/SearchBar";
 import { CurrentWeatherCard, HourlyForecastRow } from "@/components/weather/WeatherCards";
 import { RegionalClock } from "@/components/weather/RegionalClock";
+import { WeatherVibe } from "@/components/weather/WeatherVibe";
 import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
 import { LazyMap } from "@/lib/feature-registry";
@@ -67,6 +68,7 @@ export default function HomePage() {
 
       {location ? (
         <>
+          {data && <WeatherVibe weatherCode={data.current.weatherCode} isDay={data.current.isDay} />}
           <CurrentWeatherCard data={data} name={name} pending={isPending} error={isError} />
           <RegionalClock timeZone={data?.timezone ?? location.timezone} name={name} />
           {data && <HourlyForecastRow data={data} />}
