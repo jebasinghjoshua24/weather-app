@@ -53,7 +53,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="atmos-scrim">
+    <div className="atmos-scrim isolate">
       <WeatherBackground weatherCode={data?.current.weatherCode} isDay={data?.current.isDay} />
       {/* Floating island nav — high-end: detached pill, not edge-to-edge */}
       <header className="sticky top-6 z-20 mx-auto flex w-[min(100%-1.5rem,72rem)] flex-col gap-3 rounded-[2rem] border border-white/20 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl px-5 py-3 shadow-[0_8px_32px_rgba(15,23,42,0.08)] sm:flex-row sm:items-center sm:justify-between">
@@ -69,7 +69,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="relative mx-auto flex min-h-screen max-w-[72rem] flex-col gap-8 px-4 py-10 md:px-6 md:py-12">
+      <main className="relative z-10 mx-auto flex min-h-screen max-w-[72rem] flex-col gap-8 px-4 py-10 md:px-6 md:py-12">
         {location ? (
           <div className="grid grid-cols-12 gap-6">
             {/* Vibe — full width, no eyebrow, headline carries weight */}

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 export function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("bezel", className)} {...props}>
-      <div className="bezel-inner overflow-hidden rounded-[var(--radius)]">{children}</div>
+      <div className="bezel-inner overflow-hidden rounded-[var(--radius)] bg-white/75 dark:bg-zinc-900/70 backdrop-blur-md">{children}</div>
     </div>
   );
 }

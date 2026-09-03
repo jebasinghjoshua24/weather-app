@@ -102,7 +102,7 @@ export function WeatherBackground({
   if (weatherCode == null) return null;
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
       {prev && (
         <div
           className="absolute inset-0 transition-opacity duration-[1200ms] ease-out"
