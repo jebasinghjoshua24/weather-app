@@ -94,48 +94,90 @@ body::after {
   background: linear-gradient(180deg, transparent 65%, hsl(240 10% 4% / 0.35) 100%);
 }
 
-/* Sky orbs — subtle drift, disabled under reduced-motion */
+/* Sky orbs — alive but premium, faster drift */
 .sky-orb {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(22px);
+  filter: blur(20px);
   will-change: transform;
-  opacity: 0.14;
+  opacity: 0.20;
 }
-.dark .sky-orb { opacity: 0.08; }
+.dark .sky-orb { opacity: 0.11; }
 .sky-orb--a {
   width: 900px;
   height: 600px;
   left: -10%;
   top: -8%;
-  animation: drift-a 62s cubic-bezier(0.32,0.72,0,1) infinite alternate;
+  animation: drift-a 38s cubic-bezier(0.32,0.72,0,1) infinite alternate;
 }
 .sky-orb--b {
   width: 700px;
   height: 500px;
   right: -8%;
   top: 22%;
-  animation: drift-b 74s cubic-bezier(0.32,0.72,0,1) infinite alternate;
+  animation: drift-b 44s cubic-bezier(0.32,0.72,0,1) infinite alternate;
 }
 .sky-orb--c {
   width: 800px;
   height: 520px;
   left: 28%;
   bottom: -12%;
-  animation: drift-c 68s cubic-bezier(0.32,0.72,0,1) infinite alternate;
+  animation: drift-c 42s cubic-bezier(0.32,0.72,0,1) infinite alternate;
+}
+.sky-orb--overcast {
+  width: 1400px;
+  height: 700px;
+  left: -10%;
+  top: 8%;
+  animation: drift-a 52s cubic-bezier(0.32,0.72,0,1) infinite alternate;
 }
 
 @keyframes drift-a {
   0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(60px, 30px, 0) scale(1.06); }
+  100% { transform: translate3d(70px, 28px, 0) scale(1.08); }
 }
 @keyframes drift-b {
   0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(-50px, 40px, 0) scale(1.05); }
+  100% { transform: translate3d(-60px, 36px, 0) scale(1.06); }
 }
 @keyframes drift-c {
   0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(30px, -30px, 0) scale(1.04); }
+  100% { transform: translate3d(36px, -34px, 0) scale(1.05); }
+}
+
+/* Weather extras — alive layers */
+@keyframes rainDrift {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 80px; }
+}
+@keyframes sunPulse {
+  0% { transform: scale(1); opacity: 0.95; }
+  100% { transform: scale(1.06); opacity: 1; }
+}
+@keyframes lightning {
+  0%, 92%, 100% { background: transparent; }
+  93% { background: hsl(0 0% 100% / 0.42); }
+  94% { background: transparent; }
+  95% { background: hsl(0 0% 100% / 0.18); }
+}
+.snow-layer {
+  position: absolute;
+  inset: -20%;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, hsl(0 0% 100% / 0.9) 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 60% 70%, hsl(0 0% 100% / 0.7) 50%, transparent 52%),
+    radial-gradient(1px 1px at 80% 10%, hsl(0 0% 100% / 0.6) 50%, transparent 52%);
+  background-size: 280px 280px;
+  animation: snowFall 14s linear infinite;
+}
+.snow-layer--b {
+  background-size: 340px 340px;
+  animation-duration: 19s;
+  opacity: 0.6;
+}
+@keyframes snowFall {
+  0% { transform: translate3d(0, -12%, 0); }
+  100% { transform: translate3d(22px, 12%, 0); }
 }
 
 /* Double-bezel — outer shell */
