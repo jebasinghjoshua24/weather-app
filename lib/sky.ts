@@ -1,7 +1,7 @@
 /**
  * Weather-reactive sky — foundation layer for Atmospheric Aura.
- * Why: the page background should feel like the sky at that weather + time.
- * Groups follow Open-Meteo WMO codes, mirroring lib/vibe.ts groupings.
+ * Cold luxury palette locked: zinc-slate base + single electric blue accent (221 83%).
+ * No purple/ brass/ warm beige per taste + high-end bans.
  */
 
 export type SkyScene = {
@@ -16,114 +16,114 @@ type GroupKey = "clear" | "partly" | "overcast" | "rain" | "snow" | "showers" | 
 const SKY_SCENES: Record<GroupKey, { day: SkyScene; night: SkyScene }> = {
   clear: {
     day: {
-      top: "hsl(199 89% 68%)",
-      mid: "hsl(202 85% 78%)",
-      bottom: "hsl(38 92% 80% / 0.52)",
-      glow: "hsl(38 92% 80% / 0.34)",
+      top: "hsl(221 83% 92%)",
+      mid: "hsl(210 40% 96%)",
+      bottom: "hsl(0 0% 100%)",
+      glow: "hsl(221 83% 53% / 0.07)",
     },
     night: {
-      top: "hsl(232 42% 16%)",
-      mid: "hsl(240 35% 12%)",
-      bottom: "hsl(245 28% 9%)",
-      glow: "hsl(220 70% 65% / 0.10)",
+      top: "hsl(240 10% 7%)",
+      mid: "hsl(240 8% 10%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(221 83% 53% / 0.06)",
     },
   },
   partly: {
     day: {
-      top: "hsl(200 72% 72%)",
-      mid: "hsl(210 55% 88%)",
-      bottom: "hsl(210 25% 96% / 0.9)",
-      glow: "hsl(0 0% 100% / 0.18)",
+      top: "hsl(210 30% 94%)",
+      mid: "hsl(0 0% 100%)",
+      bottom: "hsl(240 5% 98%)",
+      glow: "hsl(221 20% 80% / 0.10)",
     },
     night: {
-      top: "hsl(232 30% 20%)",
-      mid: "hsl(240 22% 14%)",
-      bottom: "hsl(240 18% 10%)",
-      glow: "hsl(0 0% 100% / 0.06)",
+      top: "hsl(240 10% 9%)",
+      mid: "hsl(240 8% 12%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(0 0% 100% / 0.04)",
     },
   },
   overcast: {
     day: {
-      top: "hsl(210 18% 62%)",
-      mid: "hsl(212 14% 78%)",
-      bottom: "hsl(210 12% 92% / 0.95)",
-      glow: "hsl(0 0% 100% / 0.10)",
+      top: "hsl(240 6% 88%)",
+      mid: "hsl(240 5% 94%)",
+      bottom: "hsl(0 0% 100%)",
+      glow: "hsl(240 4% 90% / 0.12)",
     },
     night: {
-      top: "hsl(222 18% 22%)",
-      mid: "hsl(224 14% 16%)",
-      bottom: "hsl(224 12% 10%)",
-      glow: "hsl(0 0% 100% / 0.03)",
+      top: "hsl(240 6% 14%)",
+      mid: "hsl(240 4% 10%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(240 4% 50% / 0.06)",
     },
   },
   rain: {
     day: {
-      top: "hsl(215 28% 48%)",
-      mid: "hsl(212 22% 62%)",
-      bottom: "hsl(210 16% 88% / 0.92)",
-      glow: "hsl(210 22% 80% / 0.12)",
+      top: "hsl(220 14% 82%)",
+      mid: "hsl(210 12% 92%)",
+      bottom: "hsl(0 0% 98%)",
+      glow: "hsl(221 30% 70% / 0.08)",
     },
     night: {
-      top: "hsl(222 35% 18%)",
-      mid: "hsl(224 28% 14%)",
-      bottom: "hsl(228 22% 10%)",
-      glow: "hsl(210 20% 60% / 0.08)",
+      top: "hsl(240 10% 12%)",
+      mid: "hsl(240 8% 9%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(221 30% 60% / 0.06)",
     },
   },
   snow: {
     day: {
-      top: "hsl(200 18% 88%)",
-      mid: "hsl(200 12% 94%)",
-      bottom: "hsl(0 0% 100% / 0.98)",
-      glow: "hsl(200 12% 92% / 0.30)",
+      top: "hsl(200 12% 94%)",
+      mid: "hsl(0 0% 100%)",
+      bottom: "hsl(200 10% 98%)",
+      glow: "hsl(200 10% 90% / 0.12)",
     },
     night: {
-      top: "hsl(230 22% 18%)",
-      mid: "hsl(228 16% 14%)",
-      bottom: "hsl(235 14% 10%)",
-      glow: "hsl(200 18% 80% / 0.06)",
+      top: "hsl(230 12% 14%)",
+      mid: "hsl(230 10% 10%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(200 12% 85% / 0.05)",
     },
   },
   showers: {
     day: {
-      top: "hsl(212 32% 58%)",
-      mid: "hsl(210 26% 72%)",
-      bottom: "hsl(210 18% 92% / 0.90)",
-      glow: "hsl(199 60% 85% / 0.14)",
+      top: "hsl(215 16% 86%)",
+      mid: "hsl(210 12% 94%)",
+      bottom: "hsl(0 0% 98%)",
+      glow: "hsl(221 22% 78% / 0.08)",
     },
     night: {
-      top: "hsl(224 28% 20%)",
-      mid: "hsl(226 22% 15%)",
-      bottom: "hsl(230 18% 10%)",
-      glow: "hsl(199 30% 70% / 0.06)",
+      top: "hsl(240 10% 13%)",
+      mid: "hsl(240 8% 9%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(221 20% 65% / 0.05)",
     },
   },
   storm: {
     day: {
-      top: "hsl(232 24% 32%)",
-      mid: "hsl(230 18% 42%)",
-      bottom: "hsl(228 14% 58% / 0.85)",
-      glow: "hsl(230 28% 50% / 0.16)",
+      top: "hsl(240 10% 78%)",
+      mid: "hsl(240 6% 88%)",
+      bottom: "hsl(0 0% 96%)",
+      glow: "hsl(240 12% 60% / 0.10)",
     },
     night: {
-      top: "hsl(240 38% 10%)",
-      mid: "hsl(238 32% 12%)",
-      bottom: "hsl(236 26% 10%)",
-      glow: "hsl(230 35% 55% / 0.10)",
+      top: "hsl(240 18% 10%)",
+      mid: "hsl(240 14% 7%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(240 20% 45% / 0.08)",
     },
   },
   default: {
     day: {
-      top: "hsl(210 40% 96%)",
-      mid: "hsl(210 30% 98%)",
-      bottom: "hsl(0 0% 100%)",
-      glow: "hsl(38 92% 80% / 0.12)",
+      top: "hsl(240 5% 96%)",
+      mid: "hsl(0 0% 100%)",
+      bottom: "hsl(0 0% 98%)",
+      glow: "hsl(221 83% 53% / 0.05)",
     },
     night: {
-      top: "hsl(222 47% 7%)",
-      mid: "hsl(224 35% 10%)",
-      bottom: "hsl(222 47% 7%)",
-      glow: "hsl(0 0% 100% / 0.03)",
+      top: "hsl(240 10% 4%)",
+      mid: "hsl(240 8% 7%)",
+      bottom: "hsl(240 10% 4%)",
+      glow: "hsl(221 83% 53% / 0.04)",
     },
   },
 };

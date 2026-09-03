@@ -2,31 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Design tokens — the single source of truth for colors/spacing ── */
+/* ── High-end tokens — cold luxury: stone-zinc base, single electric blue accent, off-black/white ── */
 :root {
   --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
+  --foreground: 240 10% 4%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --border: 214 32% 91%;
+  --card-foreground: 240 10% 4%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 44%;
+  --border: 240 6% 90%;
   --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
+  --primary-foreground: 0 0% 98%;
   --ring: 221 83% 53%;
-  --radius: 0.75rem;
+  --radius: 1.5rem;
 }
 
 .dark {
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 9%;
-  --card-foreground: 210 40% 98%;
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-  --border: 217 33% 17%;
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --card: 240 6% 10%;
+  --card-foreground: 0 0% 98%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 64%;
+  --border: 240 4% 16%;
   --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 7%;
+  --primary-foreground: 240 10% 4%;
   --ring: 217 91% 60%;
 }
 
@@ -38,65 +38,91 @@ body {
   color: hsl(var(--foreground));
   font-feature-settings: "rlig" 1, "calt" 1;
   min-height: 100dvh;
-  background:
-    radial-gradient(1200px 800px at 18% -8%, hsl(199 89% 88% / 0.55), transparent 62%),
-    radial-gradient(900px 700px at 92% 4%, hsl(38 92% 80% / 0.32), transparent 60%),
-    radial-gradient(1000px 900px at 70% 92%, hsl(210 40% 92% / 0.9), transparent 68%),
-    linear-gradient(180deg, hsl(210 40% 98%) 0%, hsl(0 0% 100%) 55%, hsl(210 30% 97%) 100%);
+  background: hsl(0 0% 98%);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .dark body {
-  background:
-    radial-gradient(1100px 800px at 18% -10%, hsl(199 70% 45% / 0.18), transparent 62%),
-    radial-gradient(900px 700px at 92% 2%, hsl(38 70% 55% / 0.12), transparent 60%),
-    radial-gradient(1000px 900px at 70% 92%, hsl(222 40% 16% / 0.9), transparent 68%),
-    linear-gradient(180deg, hsl(222 47% 7%) 0%, hsl(224 35% 10%) 100%);
+  background: hsl(240 10% 4%);
 }
 
-/* Atmospheric scrim for legibility — sits behind content */
+/* Atmospheric base — very restrained, single accent family, no AI-purple */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 700px at 18% -8%, hsl(221 83% 53% / 0.06), transparent 62%),
+    radial-gradient(900px 600px at 92% 6%, hsl(240 6% 90% / 0.9), transparent 60%),
+    linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(240 5% 96% / 0.6) 100%);
+}
+.dark body::before {
+  background:
+    radial-gradient(1100px 700px at 18% -10%, hsl(221 83% 53% / 0.08), transparent 62%),
+    radial-gradient(900px 600px at 92% 4%, hsl(240 6% 12% / 0.9), transparent 60%),
+    linear-gradient(180deg, hsl(240 10% 4%) 0%, hsl(240 10% 6%) 100%);
+}
+
+/* Grain — physical paper feel, fixed, pointer-events-none, low opacity */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+.dark body::after {
+  opacity: 0.035;
+}
+
+/* Atmospheric scrim for legibility — very light */
 .atmos-scrim::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(600px 400px at 50% 0%, hsl(0 0% 100% / 0.45), transparent 70%),
-    linear-gradient(180deg, transparent 60%, hsl(0 0% 100% / 0.35) 100%);
+  background: linear-gradient(180deg, transparent 55%, hsl(0 0% 100% / 0.22) 100%);
 }
 .dark .atmos-scrim::before {
-  background:
-    radial-gradient(600px 400px at 50% 0%, hsl(0 0% 100% / 0.04), transparent 70%),
-    linear-gradient(180deg, transparent 70%, hsl(222 47% 7% / 0.5) 100%);
+  background: linear-gradient(180deg, transparent 65%, hsl(240 10% 4% / 0.35) 100%);
 }
 
 /* Sky orbs — subtle drift, disabled under reduced-motion */
 .sky-orb {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(18px);
+  filter: blur(22px);
   will-change: transform;
+  opacity: 0.14;
 }
+.dark .sky-orb { opacity: 0.08; }
 .sky-orb--a {
   width: 900px;
   height: 600px;
   left: -10%;
   top: -8%;
-  animation: drift-a 62s ease-in-out infinite alternate;
+  animation: drift-a 62s cubic-bezier(0.32,0.72,0,1) infinite alternate;
 }
 .sky-orb--b {
   width: 700px;
   height: 500px;
   right: -8%;
   top: 22%;
-  animation: drift-b 74s ease-in-out infinite alternate;
+  animation: drift-b 74s cubic-bezier(0.32,0.72,0,1) infinite alternate;
 }
 .sky-orb--c {
   width: 800px;
   height: 520px;
   left: 28%;
   bottom: -12%;
-  animation: drift-c 68s ease-in-out infinite alternate;
+  animation: drift-c 68s cubic-bezier(0.32,0.72,0,1) infinite alternate;
 }
 
 @keyframes drift-a {
@@ -111,6 +137,38 @@ body {
   0% { transform: translate3d(0, 0, 0) scale(1); }
   100% { transform: translate3d(30px, -30px, 0) scale(1.04); }
 }
+
+/* Double-bezel — outer shell */
+.bezel {
+  padding: 6px;
+  border-radius: calc(var(--radius) + 6px);
+  background: hsl(0 0% 100% / 0.6);
+  border: 1px solid hsl(240 6% 90% / 0.8);
+  box-shadow: 0 8px 32px rgba(15,23,42,0.06), 0 2px 8px rgba(15,23,42,0.04);
+}
+.dark .bezel {
+  background: hsl(240 6% 10% / 0.6);
+  border-color: hsl(240 4% 16% / 0.8);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+.bezel-inner {
+  border-radius: var(--radius);
+  background: hsl(var(--card));
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.6);
+}
+.dark .bezel-inner {
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.08);
+}
+
+/* Impeccable craft floor — cheap signals themed from palette */
+::selection { background: hsl(240 10% 4%); color: hsl(0 0% 98%); }
+.dark ::selection { background: hsl(0 0% 98%); color: hsl(240 10% 4%); }
+:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+* { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 999px; }
+:where(h1,h2,h3) { text-wrap: balance; }
+p { text-wrap: pretty; }
 
 /* Reduced motion: disable aura/particle animations for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
