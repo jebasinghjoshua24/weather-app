@@ -16,57 +16,100 @@ function WeatherExtras({ code, isDay }: { code?: number; isDay?: number }) {
   const group = code != null ? groupForCode(code) : "default";
   const night = isDay === 0;
 
-  // Clear day → soft sun pulse
+  // Clear day → soft sun pulse (now much more visible)
   if (group === "clear" && !night) {
     return (
       <div className="absolute inset-0 overflow-hidden">
         <div
-          className="absolute -top-10 right-[12%] h-[420px] w-[420px] rounded-full blur-[1px]"
+          className="absolute -top-12 right-[10%] h-[520px] w-[520px] rounded-full"
           style={{
-            background: "radial-gradient(50% 50% at 50% 50%, hsl(38 92% 80% / 0.55) 0%, hsl(38 92% 78% / 0.18) 42%, transparent 72%)",
-            animation: "sunPulse 9s cubic-bezier(0.32,0.72,0,1) infinite alternate",
+            background: "radial-gradient(50% 50% at 50% 50%, hsl(38 96% 72% / 0.85) 0%, hsl(38 92% 78% / 0.38) 38%, hsl(38 92% 80% / 0.14) 58%, transparent 74%)",
+            filter: "blur(8px)",
+            animation: "sunPulse 7s cubic-bezier(0.32,0.72,0,1) infinite alternate",
+          }}
+        />
+        <div
+          className="absolute -top-6 right-[18%] h-[260px] w-[260px] rounded-full"
+          style={{
+            background: "radial-gradient(50% 50% at 50% 50%, hsl(0 0% 100% / 0.95) 0%, hsl(38 100% 92% / 0.0) 70%)",
+            filter: "blur(0.5px)",
           }}
         />
       </div>
     );
   }
-
-  // Rain / showers → diagonal streaks
-  if (group === "rain" || group === "showers") {
+  if (group === "clear" && night) {
     return (
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-[0.18] dark:opacity-[0.12]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(108deg, transparent 0 22px, hsl(210 14% 55% / 0.9) 22px 23px)",
-          backgroundSize: "80px 80px",
-          animation: "rainDrift 1.8s linear infinite",
-        }}
-      />
+      <div aria-hidden className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.55]" style={{ backgroundImage: "radial-gradient(1.2px 1.2px at 22% 18%, hsl(0 0% 100% / 0.95) 50%, transparent 52%), radial-gradient(1px 1px at 58% 42%, hsl(0 0% 100% / 0.7) 50%, transparent 52%), radial-gradient(1.4px 1.4px at 78% 22%, hsl(0 0% 100% / 0.85) 50%, transparent 52%), radial-gradient(1px 1px at 44% 78%, hsl(0 0% 100% / 0.6) 50%, transparent 52%)", backgroundSize: "420px 320px" }} />
+      </div>
     );
   }
 
-  // Snow → falling flakes (pure CSS dots)
+  // Rain / showers → diagonal streaks (now thick and obvious)
+  if (group === "rain" || group === "showers") {
+    return (
+      <>
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.42] dark:opacity-[0.32]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(108deg, transparent 0 16px, hsl(210 32% 28% / 0.95) 16px 18.5px)",
+            backgroundSize: "90px 90px",
+            animation: "rainDrift 0.65s linear infinite",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.18] dark:opacity-[0.12]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(108deg, transparent 0 28px, hsl(210 18% 82% / 0.9) 28px 29px)",
+            backgroundSize: "120px 120px",
+            animation: "rainDrift 0.9s linear infinite reverse",
+          }}
+        />
+      </>
+    );
+  }
+
+  // Snow → falling flakes (much larger + faster)
   if (group === "snow") {
     return (
       <div aria-hidden className="absolute inset-0 overflow-hidden">
         <div className="snow-layer snow-layer--a" />
         <div className="snow-layer snow-layer--b" />
+        <div className="snow-layer snow-layer--c" />
       </div>
     );
   }
 
-  // Storm → occasional lightning flash
+  // Storm → lightning flash (more frequent) + heavy streaks
   if (group === "storm") {
-    return <div aria-hidden className="absolute inset-0 bg-white/0 animate-[lightning_11s_ease-in-out_infinite]" />;
+    return (
+      <>
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.32] dark:opacity-[0.26]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(108deg, transparent 0 18px, hsl(230 18% 22% / 0.9) 18px 20px)",
+            backgroundSize: "100px 100px",
+            animation: "rainDrift 0.55s linear infinite",
+          }}
+        />
+        <div aria-hidden className="absolute inset-0 bg-white/0 animate-[lightning_7s_ease-in-out_infinite]" />
+      </>
+    );
   }
 
-  // Overcast → heavier, slower cloud bank
+  // Overcast → heavier, slower cloud bank (much more visible)
   if (group === "overcast") {
     return (
-      <div className="absolute inset-0 overflow-hidden opacity-[0.16]">
-        <div className="sky-orb sky-orb--overcast" style={{ background: "radial-gradient(900px 500px at 50% 50%, hsl(0 0% 100% / 0.22), transparent 72%)" }} />
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-[8%] left-[-8%] h-[760px] w-[1100px] rounded-full blur-[18px] opacity-[0.32] dark:opacity-[0.18]" style={{ background: "radial-gradient(70% 60% at 50% 50%, hsl(0 0% 100% / 0.95) 0%, hsl(0 0% 100% / 0.42) 38%, transparent 72%)" }} />
+        <div className="absolute top-[18%] right-[-6%] h-[520px] w-[780px] rounded-full blur-[14px] opacity-[0.22] dark:opacity-[0.12]" style={{ background: "radial-gradient(70% 60% at 50% 50%, hsl(0 0% 100% / 0.88) 0%, transparent 72%)" }} />
       </div>
     );
   }
