@@ -36,8 +36,38 @@
 
 body {
   color: hsl(var(--foreground));
-  background: hsl(var(--background));
   font-feature-settings: "rlig" 1, "calt" 1;
+  min-height: 100dvh;
+  background:
+    radial-gradient(1200px 800px at 18% -8%, hsl(199 89% 88% / 0.55), transparent 62%),
+    radial-gradient(900px 700px at 92% 4%, hsl(38 92% 80% / 0.32), transparent 60%),
+    radial-gradient(1000px 900px at 70% 92%, hsl(210 40% 92% / 0.9), transparent 68%),
+    linear-gradient(180deg, hsl(210 40% 98%) 0%, hsl(0 0% 100%) 55%, hsl(210 30% 97%) 100%);
+}
+
+.dark body {
+  background:
+    radial-gradient(1100px 800px at 18% -10%, hsl(199 70% 45% / 0.18), transparent 62%),
+    radial-gradient(900px 700px at 92% 2%, hsl(38 70% 55% / 0.12), transparent 60%),
+    radial-gradient(1000px 900px at 70% 92%, hsl(222 40% 16% / 0.9), transparent 68%),
+    linear-gradient(180deg, hsl(222 47% 7%) 0%, hsl(224 35% 10%) 100%);
+}
+
+/* Atmospheric scrim for legibility — sits behind content */
+.atmos-scrim::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(600px 400px at 50% 0%, hsl(0 0% 100% / 0.45), transparent 70%),
+    linear-gradient(180deg, transparent 60%, hsl(0 0% 100% / 0.35) 100%);
+}
+.dark .atmos-scrim::before {
+  background:
+    radial-gradient(600px 400px at 50% 0%, hsl(0 0% 100% / 0.04), transparent 70%),
+    linear-gradient(180deg, transparent 70%, hsl(222 47% 7% / 0.5) 100%);
 }
 
 /* Reduced motion: disable aura/particle animations for users who prefer it */

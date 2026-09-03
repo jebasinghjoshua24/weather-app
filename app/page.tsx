@@ -52,9 +52,10 @@ export default function HomePage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 p-4 md:p-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Atmos</h1>
+    <div className="atmos-scrim">
+      <main className="relative mx-auto flex min-h-screen max-w-5xl flex-col gap-6 p-4 md:p-8">
+      <header className="sticky top-0 z-20 -mx-4 -mt-4 mb-2 flex flex-col gap-3 border-b border-white/20 bg-white/55 dark:bg-zinc-900/55 backdrop-blur-xl px-4 py-4 sm:-mx-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <h1 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Atmos <span className="font-bold normal-case tracking-tight text-foreground text-lg ml-2">Weather, beautifully</span></h1>
         <div className="flex items-center gap-2">
           <SearchBar onPick={(lat, lon, name) => setLocation({ lat, lon, name })} />
           <Button variant="outline" onClick={() => setUnit(unit === "celsius" ? "fahrenheit" : "celsius")} aria-label="Toggle temperature unit">
@@ -85,9 +86,10 @@ export default function HomePage() {
         </div>
       )}
 
-      <footer className="mt-auto border-t pt-4 text-center text-xs text-muted-foreground">
+      <footer className="mt-auto border-t border-white/20 pt-4 text-center text-xs text-muted-foreground">
         Data by <a className="underline" href="https://open-meteo.com" target="_blank" rel="noreferrer">Open-Meteo</a> (CC BY 4.0) · Mumbai ap-south-1 · Built with Next 16 + RLS
       </footer>
-    </main>
+      </main>
+    </div>
   );
 }
