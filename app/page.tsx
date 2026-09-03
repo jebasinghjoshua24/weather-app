@@ -136,10 +136,10 @@ export default function HomePage() {
         <header className="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/40 backdrop-blur-md p-4 rounded-3xl border border-white/10 shadow-2xl">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-amber-300">
-              <Sun className="h-7 w-7 animate-bounce" style={{ animationDuration: "3s" }} />
+              <Sun className="h-7 w-7 animate-[spin_18s_linear_infinite]" style={{ animationDuration: "18s" }} />
             </div>
             <div>
-              <h1 className="font-[var(--font-slab)] text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-amber-200">
+              <h1 className="font-[var(--font-slab)] text-2xl font-black tracking-tight text-white">
                 ATMOSPHERE
               </h1>
               <p className="text-xs uppercase tracking-wider text-slate-300 font-medium">Dynamic Weather Engine</p>
@@ -152,13 +152,13 @@ export default function HomePage() {
 
           <div className="flex items-center gap-3">
             <div className="flex items-center bg-slate-950/40 p-1 rounded-2xl border border-white/10">
-              <button onClick={() => setUnitPref("celsius")} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${unit === "C" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-300"}`}>°C</button>
-              <button onClick={() => setUnitPref("fahrenheit")} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${unit === "F" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-300"}`}>°F</button>
+              <button onClick={() => setUnitPref("celsius")} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "C" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°C</button>
+              <button onClick={() => setUnitPref("fahrenheit")} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "F" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°F</button>
             </div>
-            <button className={`p-3 rounded-2xl border ${!isAudioMuted ? "bg-amber-400 text-slate-900 border-amber-300" : "bg-slate-900/40 text-slate-300 border-white/10"}`}>
+            <button className={`p-3 rounded-2xl border transition-colors duration-200 ${!isAudioMuted ? "bg-amber-400 text-slate-900 border-amber-300" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
               {!isAudioMuted ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
             </button>
-            <button onClick={toggleFavorite} className={`p-3 rounded-2xl border ${isFav ? "bg-rose-500/80 text-white border-rose-400" : "bg-slate-900/40 text-slate-300 border-white/10"}`}>
+            <button onClick={toggleFavorite} className={`p-3 rounded-2xl border transition-colors duration-200 ${isFav ? "bg-rose-500 text-white border-rose-400 shadow-lg" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
               <Star className={`h-5 w-5 ${isFav ? "fill-current" : ""}`} />
             </button>
           </div>
@@ -209,7 +209,7 @@ export default function HomePage() {
                       <h2 className="font-[var(--font-slab)] text-4xl sm:text-6xl font-black tracking-tight text-white">{location.name}</h2>
                       <RegionalClock timeZone={data.timezone ?? location.timezone} name={name} />
                       <div className="flex items-baseline gap-4">
-                        <span className="bg-gradient-to-b from-white to-slate-200 bg-clip-text text-7xl sm:text-8xl font-extrabold tracking-tighter text-transparent font-[var(--font-slab)]">
+                        <span className="text-7xl sm:text-8xl font-extrabold tracking-tighter text-white font-[var(--font-slab)]">
                           {formatTemp(data.current.temperature, unit)}°
                         </span>
                         <div className="space-y-1">
