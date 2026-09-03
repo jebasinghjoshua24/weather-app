@@ -16,6 +16,11 @@ export interface CurrentWeather {
   weatherCode: WeatherCode;
   isDay: number;
   time: string;
+  humidity?: number;
+  apparentTemperature?: number;
+  cloudCover?: number;
+  pressure?: number;
+  precipitation?: number;
 }
 
 export interface HourlyForecast {
@@ -34,6 +39,8 @@ export interface DailyForecast {
   tempMin: number[];
   sunrise: string[];
   sunset: string[];
+  uvIndexMax?: number[];
+  precipitationSum?: number[];
 }
 
 export interface WeatherResponse {
@@ -79,6 +86,11 @@ function mapRawToWeather(raw: Record<string, unknown>): WeatherResponse {
       weatherCode: (c.weather_code ?? c.weatherCode) as number,
       isDay: (c.is_day ?? c.isDay) as number,
       time: c.time as string,
+      humidity: (c.relative_humidity_2m as number) ?? undefined,
+      apparentTemperature: (c.apparent_temperature as number) ?? undefined,
+      cloudCover: (c.cloud_cover as number) ?? undefined,
+      pressure: (c.surface_pressure as number) ?? undefined,
+      precipitation: (c.precipitation as number) ?? undefined,
     },
     hourly: {
       time: (h.time as string[]) ?? [],
@@ -95,6 +107,8 @@ function mapRawToWeather(raw: Record<string, unknown>): WeatherResponse {
       tempMin: (d.temperature_2m_min ?? d.tempMin ?? []) as number[],
       sunrise: (d.sunrise as string[]) ?? [],
       sunset: (d.sunset as string[]) ?? [],
+      uvIndexMax: (d.uv_index_max as number[]) ?? undefined,
+      precipitationSum: (d.precipitation_sum as number[]) ?? undefined,
     },
   };
 }
@@ -104,9 +118,10 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherRes
   const params = new URLSearchParams({
     latitude: String(lat),
     longitude: String(lon),
-    current: "temperature_2m,wind_speed_10m,wind_direction_10m,weather_code,is_day",
+    current:
+      "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,surface_pressure",
     hourly: "temperature_2m,weather_code,precipitation,relative_humidity_2m,wind_speed_10m",
-    daily: "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset",
+    daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset,uv_index_max",
     timezone: "auto",
     forecast_days: "7",
   });

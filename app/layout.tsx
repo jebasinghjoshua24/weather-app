@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono, Outfit } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono, Outfit, Roboto_Slab } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
 const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
+const slab = Roboto_Slab({ subsets: ["latin"], variable: "--font-slab", display: "swap", weight: ["400", "700", "800"] });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${display.variable} ${mono.variable} ${outfit.variable} font-sans antialiased selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-zinc-900`}>
+      <body className={`${display.variable} ${mono.variable} ${outfit.variable} ${slab.variable} font-sans antialiased selection:bg-amber-400 selection:text-slate-900`}>
         <Providers>{children}</Providers>
       </body>
     </html>

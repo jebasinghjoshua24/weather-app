@@ -1,38 +1,104 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useWeatherStore } from "@/store/useWeatherStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useWeatherData } from "@/hooks/useWeatherData";
-import { usePreferencesStore, tempLabel } from "@/store/usePreferencesStore";
+import { usePreferencesStore } from "@/store/usePreferencesStore";
 import { DEFAULT_LOCATION } from "@/lib/constants";
 import { SearchBar } from "@/components/weather/SearchBar";
-import { CurrentWeatherCard, HourlyForecastRow } from "@/components/weather/WeatherCards";
 import { RegionalClock } from "@/components/weather/RegionalClock";
-import { WeatherBackground } from "@/components/weather/WeatherBackground";
 import { WeatherVibe } from "@/components/weather/WeatherVibe";
 import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
 import { LazyMap } from "@/lib/feature-registry";
-import type { EonetEvent } from "@/lib/eonet";
+import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { Button } from "@/components/ui/button";
+import {
+  Wind,
+  Droplets,
+  Sun,
+  Thermometer,
+  Eye,
+  MapPin,
+  Volume2,
+  VolumeX,
+  Star,
+  Navigation,
+  RefreshCw,
+  ShieldAlert,
+} from "lucide-react";
+
+const POPULAR_CITIES = [
+  { name: "Tokyo", country: "Japan", lat: 35.6762, lon: 139.6503 },
+  { name: "New York", country: "United States", lat: 40.7128, lon: -74.006 },
+  { name: "London", country: "United Kingdom", lat: 51.5074, lon: -0.1278 },
+  { name: "Paris", country: "France", lat: 48.8566, lon: 2.3522 },
+  { name: "Sydney", country: "Australia", lat: -33.8688, lon: 151.2093 },
+  { name: "Cairo", country: "Egypt", lat: 30.0444, lon: 31.2357 },
+];
+
+function getBackgroundGradient(key: string) {
+  switch (key) {
+    case "clear_day":
+      return "from-sky-400 via-amber-300/40 to-blue-600";
+    case "clear_night":
+      return "from-slate-950 via-indigo-950 to-sky-900";
+    case "partly_cloudy_day":
+      return "from-blue-500 via-sky-300 to-slate-600";
+    case "partly_cloudy_night":
+      return "from-slate-900 via-indigo-900 to-slate-800";
+    case "cloudy":
+      return "from-slate-700 via-slate-600 to-slate-800";
+    case "rain":
+      return "from-slate-900 via-blue-950 to-slate-800";
+    case "thunderstorm":
+      return "from-zinc-950 via-purple-950 to-slate-900";
+    case "snow":
+      return "from-slate-400 via-cyan-900 to-slate-800";
+    case "fog":
+      return "from-slate-600 via-zinc-500 to-slate-700";
+    default:
+      return "from-sky-500 to-indigo-900";
+  }
+}
+
+function formatTemp(c: number | undefined | null, unit: string) {
+  if (c == null) return "--";
+  return unit === "F" ? Math.round((c * 9) / 5 + 32) : Math.round(c);
+}
 
 export default function HomePage() {
   const { location, setLocation, setError } = useWeatherStore();
-  const { coords, error: geoError, loading: geoLoading, request } = useGeolocation();
-  const unit = usePreferencesStore((s) => s.unit);
-  const setUnit = usePreferencesStore((s) => s.setUnit);
+  const { coords, error: geoError, request } = useGeolocation();
+  const unitPref = usePreferencesStore((s) => s.unit);
+  const setUnitPref = usePreferencesStore((s) => s.setUnit);
+  const unit = unitPref === "fahrenheit" ? "F" : "C";
 
-  // On mount, auto-detect; fallback to DEFAULT_LOCATION
+  const [isAudioMuted] = useState(true);
+  const [favorites, setFavorites] = useState(() => {
+    if (typeof window === "undefined") return [DEFAULT_LOCATION];
+    try {
+      const saved = localStorage.getItem("atmos_favs");
+      return saved ? JSON.parse(saved) : [DEFAULT_LOCATION];
+    } catch {
+      return [DEFAULT_LOCATION];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("atmos_favs", JSON.stringify(favorites));
+    } catch {}
+  }, [favorites]);
+
   useEffect(() => {
     if (!location && !coords) request();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (coords && !location) {
-      setLocation({ lat: coords.lat, lon: coords.lon, name: "Your location" });
-    }
+    if (coords && !location) setLocation({ lat: coords.lat, lon: coords.lon, name: "Your location" });
   }, [coords, location, setLocation]);
 
   useEffect(() => {
@@ -43,85 +109,172 @@ export default function HomePage() {
   const lon = location?.lon ?? null;
   const name = location?.name ?? DEFAULT_LOCATION.name;
   const { data, isPending, isError } = useWeatherData(lat, lon);
-  const handleFlyTo = (ev: EonetEvent) => {
-    const g = ev.geometry[0];
-    if (!g) return;
-    const pos = Array.isArray(g.coordinates) && typeof g.coordinates[0] === "number"
-      ? { lat: (g.coordinates as number[])[1], lon: (g.coordinates as number[])[0] }
-      : null;
-    if (pos) setLocation({ lat: pos.lat, lon: pos.lon, name: ev.title });
+
+  const conditionKey = data ? getConditionKey(data.current.weatherCode, data.current.isDay) : "clear_day";
+  const gradient = getBackgroundGradient(conditionKey);
+
+  const toggleFavorite = () => {
+    if (!location) return;
+    const exists = favorites.some((f: { name: string }) => f.name === location.name);
+    if (exists) setFavorites(favorites.filter((f: { name: string }) => f.name !== location.name));
+    else setFavorites([...favorites, { name: location.name, lat: location.lat, lon: location.lon }]);
   };
+  const isFav = location ? favorites.some((f: { name: string }) => f.name === location.name) : false;
 
   return (
-    <div className="atmos-scrim isolate">
-      <WeatherBackground weatherCode={data?.current.weatherCode} isDay={data?.current.isDay} />
-      {/* Floating island nav — high-end: detached pill, not edge-to-edge */}
-      <header className="sticky top-6 z-20 mx-auto flex w-[min(100%-1.5rem,72rem)] flex-col gap-3 rounded-[2rem] border border-white/20 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl px-5 py-3 shadow-[0_8px_32px_rgba(15,23,42,0.08)] sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-[var(--font-display)] text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Atmos <span className="ml-2 font-bold normal-case tracking-tighter text-foreground text-xl">Weather, beautifully</span></h1>
-        <div className="flex items-center gap-2">
-          <SearchBar onPick={(lat, lon, name) => setLocation({ lat, lon, name })} />
-          <Button variant="outline" onClick={() => setUnit(unit === "celsius" ? "fahrenheit" : "celsius")} aria-label="Toggle temperature unit">
-            {tempLabel(unit)}
-          </Button>
-          <Button variant="ghost" onClick={request} disabled={geoLoading} aria-label="Use my location">
-            {geoLoading ? "…" : "My location"}
-          </Button>
+    <div className={`min-h-screen relative font-[var(--font-display)] text-slate-100 overflow-x-hidden bg-gradient-to-br ${gradient} transition-all duration-1000 selection:bg-amber-400 selection:text-slate-900`}>
+      <WeatherCanvas conditionKey={conditionKey} />
+
+      {(conditionKey.includes("cloud") || conditionKey === "rain" || conditionKey === "thunderstorm") && (
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-30">
+          <div className="absolute -top-20 -left-20 h-[600px] w-[600px] rounded-full bg-slate-300 blur-[120px] animate-pulse" />
+          <div className="absolute top-1/3 -right-20 h-[700px] w-[700px] rounded-full bg-slate-400 blur-[140px] animate-pulse" style={{ animationDuration: "8s" }} />
         </div>
-      </header>
+      )}
 
-      <main className="relative z-10 mx-auto flex min-h-screen max-w-[72rem] flex-col gap-8 px-4 py-10 md:px-6 md:py-12">
-        {location ? (
-          <div className="grid grid-cols-12 gap-6">
-            {/* Vibe — full width, no eyebrow, headline carries weight */}
-            {data && (
-              <div className="col-span-12 animate-[fadeIn_700ms_cubic-bezier(0.32,0.72,0,1)]">
-                <WeatherVibe weatherCode={data.current.weatherCode} isDay={data.current.isDay} />
-              </div>
-            )}
-
-            {/* Asymmetrical bento: Current 8 + Clock 4 */}
-            <div className="col-span-12 lg:col-span-8 animate-[fadeIn_700ms_cubic-bezier(0.32,0.72,0,1)_100ms_both]">
-              <CurrentWeatherCard data={data} name={name} pending={isPending} error={isError} />
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        <header className="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/40 backdrop-blur-md p-4 rounded-3xl border border-white/10 shadow-2xl">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-amber-300">
+              <Sun className="h-7 w-7 animate-bounce" style={{ animationDuration: "3s" }} />
             </div>
-            <div className="col-span-12 lg:col-span-4 animate-[fadeIn_700ms_cubic-bezier(0.32,0.72,0,1)_180ms_both]">
-              <RegionalClock timeZone={data?.timezone ?? location.timezone} name={name} />
-            </div>
-
-            {/* Hourly — full width */}
-            {data && (
-              <div className="col-span-12 animate-[fadeIn_700ms_cubic-bezier(0.32,0.72,0,1)_260ms_both]">
-                <HourlyForecastRow data={data} />
-              </div>
-            )}
-
-            {/* Map 7 + Disaster 5 — bento rhythm, not two same-size cards */}
-            <div className="col-span-12 lg:col-span-7 animate-[fadeIn_700ms_cubic-bezier(0.32,0.72,0,1)_340ms_both]">
-              <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
-            </div>
-            <div className="col-span-12 lg:col-span-5 animate-[fadeIn_700ms_cubic-bezier(0.32,0.72,0,1)_420ms_both]">
-              <DisasterAlerts location={lat != null && lon != null ? { lat, lon } : null} onFlyTo={handleFlyTo} />
-            </div>
-
-            {/* News — full width */}
-            <div className="col-span-12 animate-[fadeIn_700ms_cubic-bezier(0.32,0.72,0,1)_500ms_both]">
-              <NewsFeed country={location.country ?? null} />
+            <div>
+              <h1 className="font-[var(--font-slab)] text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-amber-200">
+                ATMOSPHERE
+              </h1>
+              <p className="text-xs uppercase tracking-wider text-slate-300 font-medium">Dynamic Weather Engine</p>
             </div>
           </div>
-        ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center py-24">
-            <p className="text-muted-foreground max-w-[65ch]">Enable location or search for a city to see the weather.</p>
+
+          <div className="relative w-full md:w-96">
+            <SearchBar onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-slate-950/40 p-1 rounded-2xl border border-white/10">
+              <button onClick={() => setUnitPref("celsius")} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${unit === "C" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-300"}`}>°C</button>
+              <button onClick={() => setUnitPref("fahrenheit")} className={`px-3 py-1.5 rounded-xl text-xs font-bold ${unit === "F" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-300"}`}>°F</button>
+            </div>
+            <button className={`p-3 rounded-2xl border ${!isAudioMuted ? "bg-amber-400 text-slate-900 border-amber-300" : "bg-slate-900/40 text-slate-300 border-white/10"}`}>
+              {!isAudioMuted ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+            </button>
+            <button onClick={toggleFavorite} className={`p-3 rounded-2xl border ${isFav ? "bg-rose-500/80 text-white border-rose-400" : "bg-slate-900/40 text-slate-300 border-white/10"}`}>
+              <Star className={`h-5 w-5 ${isFav ? "fill-current" : ""}`} />
+            </button>
+          </div>
+        </header>
+
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <span className="flex items-center gap-1 text-xs uppercase tracking-widest text-slate-300/80 font-mono">
+            <MapPin className="h-3.5 w-3.5 text-amber-300" /> Presets:
+          </span>
+          {POPULAR_CITIES.map((c) => (
+            <button
+              key={c.name}
+              onClick={() => setLocation({ lat: c.lat, lon: c.lon, name: c.name })}
+              className={`whitespace-nowrap rounded-2xl px-4 py-2 text-xs font-semibold backdrop-blur-md border ${location?.name === c.name ? "bg-white text-slate-900 border-white font-bold shadow-lg scale-105" : "bg-slate-900/30 text-slate-200 border-white/10 hover:bg-white/10"}`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+
+        {isPending && (
+          <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border border-white/10 bg-slate-900/30 backdrop-blur-md">
+            <RefreshCw className="h-10 w-10 animate-spin text-amber-300" />
+            <p className="font-[var(--font-slab)] text-lg text-slate-200">Fetching live weather dynamics...</p>
+          </div>
+        )}
+
+        {isError && (
+          <div className="space-y-3 rounded-3xl border border-rose-500/30 bg-rose-950/60 p-6 text-center backdrop-blur-md">
+            <ShieldAlert className="mx-auto h-10 w-10 text-rose-400" />
+            <h3 className="font-[var(--font-slab)] text-xl font-bold">Unable to load weather data</h3>
+            <p className="text-sm text-slate-300">Please try another location.</p>
+          </div>
+        )}
+
+        {!isPending && !isError && data && location && (
+          <div className="space-y-8">
+            {data && <WeatherVibe weatherCode={data.current.weatherCode} isDay={data.current.isDay} />}
+
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-12 lg:col-span-8">
+                <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-slate-900/40 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
+                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-center">
+                    <div className="lg:col-span-7 space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-amber-300 font-mono">
+                        <Navigation className="h-4 w-4" /> {location.country || "Global"}
+                      </div>
+                      <h2 className="font-[var(--font-slab)] text-4xl sm:text-6xl font-black tracking-tight text-white">{location.name}</h2>
+                      <RegionalClock timeZone={data.timezone ?? location.timezone} name={name} />
+                      <div className="flex items-baseline gap-4">
+                        <span className="bg-gradient-to-b from-white to-slate-200 bg-clip-text text-7xl sm:text-8xl font-extrabold tracking-tighter text-transparent font-[var(--font-slab)]">
+                          {formatTemp(data.current.temperature, unit)}°
+                        </span>
+                        <div className="space-y-1">
+                          <p className="text-xl font-medium capitalize text-slate-200">{data.current.weatherCode}</p>
+                          <p className="text-sm text-slate-300">Feels like <span className="font-bold text-white">{formatTemp(data.current.apparentTemperature ?? data.current.temperature, unit)}°{unit}</span></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="lg:col-span-5 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-6">
+                      <Sun className="h-28 w-28 text-amber-300 drop-shadow-[0_10px_25px_rgba(251,191,36,0.3)] animate-pulse" style={{ animationDuration: "4s" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-12 lg:col-span-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
+                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Humidity</span><Droplets className="h-4 w-4 text-sky-400" /></div>
+                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{data.current.humidity ?? "--"}%</div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
+                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Wind</span><Wind className="h-4 w-4 text-emerald-400" /></div>
+                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{Math.round(data.current.windSpeed)}<span className="text-xs font-sans font-normal text-slate-400"> km/h</span></div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
+                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Pressure</span><Thermometer className="h-4 w-4 text-indigo-400" /></div>
+                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{data.current.pressure ? Math.round(data.current.pressure) : "--"}<span className="text-xs font-normal text-slate-400"> hPa</span></div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
+                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Cloud</span><Eye className="h-4 w-4 text-slate-300" /></div>
+                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{data.current.cloudCover ?? "--"}%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-12 lg:col-span-7">
+                <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
+              </div>
+              <div className="col-span-12 lg:col-span-5">
+                <DisasterAlerts location={lat != null && lon != null ? { lat, lon } : null} onFlyTo={(ev) => {
+                  const g = ev.geometry[0];
+                  if (!g) return;
+                  const pos = Array.isArray(g.coordinates) && typeof g.coordinates[0] === "number" ? { lat: (g.coordinates as number[])[1], lon: (g.coordinates as number[])[0] } : null;
+                  if (pos) setLocation({ lat: pos.lat, lon: pos.lon, name: ev.title });
+                }} />
+              </div>
+            </div>
+
+            <NewsFeed country={location.country ?? null} />
+          </div>
+        )}
+
+        {!location && (
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center">
+            <p className="max-w-[65ch] text-slate-200">Enable location or search for a city to see the weather.</p>
             <Button onClick={() => setLocation({ lat: DEFAULT_LOCATION.lat, lon: DEFAULT_LOCATION.lon, name: DEFAULT_LOCATION.name })}>
               Show {DEFAULT_LOCATION.name}
             </Button>
           </div>
         )}
 
-        <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800 pt-6 text-center text-xs text-muted-foreground">
-          Data by <a className="underline underline-offset-4" href="https://open-meteo.com" target="_blank" rel="noreferrer">Open-Meteo</a> (CC BY 4.0) · Mumbai ap-south-1 · Built with Next 16 + RLS
-        </footer>
-      </main>
-
-      <style>{`@keyframes fadeIn { from { opacity:0; transform: translateY(16px); filter: blur(6px); } to { opacity:1; transform: translateY(0); filter: blur(0); } }`}</style>
+        <footer className="border-t border-white/10 py-6 text-center font-mono text-xs text-slate-400">ATMOSPHERE • Live Interactive Weather Engine • Open-Meteo Integration</footer>
+      </div>
     </div>
   );
 }
