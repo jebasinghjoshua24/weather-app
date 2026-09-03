@@ -9,6 +9,7 @@ import { DEFAULT_LOCATION } from "@/lib/constants";
 import { SearchBar } from "@/components/weather/SearchBar";
 import { CurrentWeatherCard, HourlyForecastRow } from "@/components/weather/WeatherCards";
 import { RegionalClock } from "@/components/weather/RegionalClock";
+import { WeatherBackground } from "@/components/weather/WeatherBackground";
 import { WeatherVibe } from "@/components/weather/WeatherVibe";
 import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
@@ -53,6 +54,7 @@ export default function HomePage() {
 
   return (
     <div className="atmos-scrim">
+      <WeatherBackground weatherCode={data?.current.weatherCode} isDay={data?.current.isDay} />
       <main className="relative mx-auto flex min-h-screen max-w-5xl flex-col gap-6 p-4 md:p-8">
       <header className="sticky top-0 z-20 -mx-4 -mt-4 mb-2 flex flex-col gap-3 border-b border-white/20 bg-white/55 dark:bg-zinc-900/55 backdrop-blur-xl px-4 py-4 sm:-mx-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <h1 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Atmos <span className="font-bold normal-case tracking-tight text-foreground text-lg ml-2">Weather, beautifully</span></h1>

@@ -70,6 +70,48 @@ body {
     linear-gradient(180deg, transparent 70%, hsl(222 47% 7% / 0.5) 100%);
 }
 
+/* Sky orbs — subtle drift, disabled under reduced-motion */
+.sky-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(18px);
+  will-change: transform;
+}
+.sky-orb--a {
+  width: 900px;
+  height: 600px;
+  left: -10%;
+  top: -8%;
+  animation: drift-a 62s ease-in-out infinite alternate;
+}
+.sky-orb--b {
+  width: 700px;
+  height: 500px;
+  right: -8%;
+  top: 22%;
+  animation: drift-b 74s ease-in-out infinite alternate;
+}
+.sky-orb--c {
+  width: 800px;
+  height: 520px;
+  left: 28%;
+  bottom: -12%;
+  animation: drift-c 68s ease-in-out infinite alternate;
+}
+
+@keyframes drift-a {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(60px, 30px, 0) scale(1.06); }
+}
+@keyframes drift-b {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-50px, 40px, 0) scale(1.05); }
+}
+@keyframes drift-c {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(30px, -30px, 0) scale(1.04); }
+}
+
 /* Reduced motion: disable aura/particle animations for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -77,6 +119,9 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+  .sky-orb {
+    animation: none !important;
   }
 }
 
