@@ -11,7 +11,7 @@ import { RegionalClock } from "@/components/weather/RegionalClock";
 import { WeatherVibe } from "@/components/weather/WeatherVibe";
 import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
-import { LazyMap } from "@/lib/feature-registry";
+import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
 import { Button } from "@/components/ui/button";
@@ -125,6 +125,7 @@ export default function HomePage() {
   return (
     <div className={`min-h-screen relative font-[var(--font-display)] text-slate-100 overflow-x-hidden bg-gradient-to-br ${gradient} transition-all duration-1000 selection:bg-amber-400 selection:text-slate-900`}>
       <WeatherCanvas conditionKey={conditionKey} />
+      <LazyAura weatherCode={data?.current.weatherCode} isDay={data?.current.isDay} />
 
       {(conditionKey.includes("cloud") || conditionKey === "rain" || conditionKey === "thunderstorm") && (
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-30">
