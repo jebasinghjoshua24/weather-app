@@ -33,6 +33,7 @@ export function WeatherCanvas({ conditionKey }: { conditionKey: ConditionKey }) 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     let raf = 0;
+    let running = true;
     let w = (canvas.width = window.innerWidth);
     let h = (canvas.height = window.innerHeight);
     const onResize = () => {
@@ -68,6 +69,7 @@ export function WeatherCanvas({ conditionKey }: { conditionKey: ConditionKey }) 
 
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
+      if (!running) return;
       if (conditionKey === "thunderstorm") {
         lt++;
         if (lt > 180 && Math.random() < 0.03) {
@@ -132,9 +134,16 @@ export function WeatherCanvas({ conditionKey }: { conditionKey: ConditionKey }) 
       });
       raf = requestAnimationFrame(draw);
     };
+    const onVisibility = () => {
+      running = !document.hidden;
+      if (running) draw();
+      else cancelAnimationFrame(raf);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
     draw();
     return () => {
       window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibility);
       cancelAnimationFrame(raf);
     };
   }, [conditionKey]);

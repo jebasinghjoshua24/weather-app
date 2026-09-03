@@ -13,6 +13,7 @@ import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
 import { LazyMap } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
+import { wmoToDescription } from "@/lib/open-meteo";
 import { Button } from "@/components/ui/button";
 import {
   Wind,
@@ -151,14 +152,14 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center bg-slate-950/40 p-1 rounded-2xl border border-white/10">
-              <button onClick={() => setUnitPref("celsius")} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "C" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°C</button>
-              <button onClick={() => setUnitPref("fahrenheit")} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "F" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°F</button>
+            <div className="flex items-center bg-slate-950/40 p-1 rounded-2xl border border-white/10" role="group" aria-label="Temperature unit">
+              <button onClick={() => setUnitPref("celsius")} aria-pressed={unit === "C"} className={`min-h-[32px] px-3 py-2 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "C" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°C</button>
+              <button onClick={() => setUnitPref("fahrenheit")} aria-pressed={unit === "F"} className={`min-h-[32px] px-3 py-2 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "F" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°F</button>
             </div>
-            <button className={`p-3 rounded-2xl border transition-colors duration-200 ${!isAudioMuted ? "bg-amber-400 text-slate-900 border-amber-300" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
+            <button aria-label="Toggle ambient weather sound" className={`p-3 rounded-2xl border transition-colors duration-200 ${!isAudioMuted ? "bg-amber-400 text-slate-900 border-amber-300" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
               {!isAudioMuted ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
             </button>
-            <button onClick={toggleFavorite} className={`p-3 rounded-2xl border transition-colors duration-200 ${isFav ? "bg-rose-500 text-white border-rose-400 shadow-lg" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
+            <button onClick={toggleFavorite} aria-label={isFav ? "Remove from favorites" : "Save location"} aria-pressed={isFav} className={`p-3 rounded-2xl border transition-colors duration-200 ${isFav ? "bg-rose-500 text-white border-rose-400 shadow-lg" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
               <Star className={`h-5 w-5 ${isFav ? "fill-current" : ""}`} />
             </button>
           </div>
@@ -213,7 +214,7 @@ export default function HomePage() {
                           {formatTemp(data.current.temperature, unit)}°
                         </span>
                         <div className="space-y-1">
-                          <p className="text-xl font-medium capitalize text-slate-200">{data.current.weatherCode}</p>
+                          <p className="text-xl font-medium capitalize text-slate-200">{wmoToDescription(data.current.weatherCode)}</p>
                           <p className="text-sm text-slate-300">Feels like <span className="font-bold text-white">{formatTemp(data.current.apparentTemperature ?? data.current.temperature, unit)}°{unit}</span></p>
                         </div>
                       </div>
