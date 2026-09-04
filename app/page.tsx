@@ -13,6 +13,7 @@ import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
 import { HorizonSimulator } from "@/components/weather/HorizonSimulator";
 import { StargazingScore } from "@/components/weather/StargazingScore";
+import { WhatToWear } from "@/components/weather/WhatToWear";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -256,8 +257,14 @@ export default function HomePage() {
                     <HorizonSimulator lat={lat!} lon={lon!} timezone={data.timezone} cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
                   </div>
                 </div>
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-4 space-y-6">
                   <StargazingScore cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
+                  <WhatToWear
+                    temperature={data.current.temperature}
+                    windSpeed={data.current.windSpeed}
+                    precipitation={data.current.precipitation}
+                    weatherCode={data.current.weatherCode}
+                  />
                 </div>
               </div>
             </div>
