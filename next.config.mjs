@@ -25,8 +25,8 @@ const nextConfig = {
               "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tilecache.rainviewer.com https://unpkg.com https://i.ytimg.com https://img.youtube.com https://openstreetmap.org",
               // Fonts: self-hosted via next/font
               "font-src 'self'",
-              // Connect: APIs we talk to directly (open-meteo is direct, not proxied)
-              "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.rainviewer.com https://eonet.gsfc.nasa.gov https://*.supabase.co",
+              // Connect: APIs we talk to directly (open-meteo is direct, not proxied) + HMR ws for dev
+              "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.rainviewer.com https://eonet.gsfc.nasa.gov https://*.supabase.co ws://localhost:3000 ws://127.0.0.1:3000 wss://localhost:3000 wss: ws:",
               // Frames: no one should embed our app
               "frame-ancestors 'none'",
               "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
