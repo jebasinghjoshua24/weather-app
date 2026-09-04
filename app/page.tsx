@@ -11,6 +11,7 @@ import { RegionalClock } from "@/components/weather/RegionalClock";
 import { WeatherVibe } from "@/components/weather/WeatherVibe";
 import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
+import { HorizonSimulator } from "@/components/weather/HorizonSimulator";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -245,6 +246,11 @@ export default function HomePage() {
                     <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{data.current.cloudCover ?? "--"}%</div>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div className="col-span-12">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/30 backdrop-blur-md">
+                <HorizonSimulator lat={lat!} lon={lon!} timezone={data.timezone} cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
               </div>
             </div>
 
