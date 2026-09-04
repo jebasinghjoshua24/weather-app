@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
 
@@ -36,18 +36,29 @@ function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lon: number) =
 import type { EonetEvent } from "@/lib/eonet";
 import { eventLatLon } from "@/lib/eonet";
 
+const ShelterIcon = L.icon({
+  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
 export function MapView({
   lat,
   lon,
   name,
   onPick,
   disasters = [],
+  shelters = [],
+  shelterRoute = null,
 }: {
   lat: number;
   lon: number;
   name: string;
   onPick: (lat: number, lon: number, name: string) => void;
   disasters?: EonetEvent[];
+  shelters?: Array<{ id: string; lat: number; lon: number; name: string }>;
+  shelterRoute?: [number, number][] | null;
 }) {
   const [clickPos, setClickPos] = useState<{ lat: number; lon: number } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -98,6 +109,14 @@ export function MapView({
             </Marker>
           );
         })}
+        {shelters.map((s) => (
+          <Marker key={`shelter-${s.id}`} position={[s.lat, s.lon]} icon={ShelterIcon}>
+            <Popup>{s.name}</Popup>
+          </Marker>
+        ))}
+        {shelterRoute && shelterRoute.length > 1 && (
+          <Polyline positions={shelterRoute} pathOptions={{ color: "#f59e0b", weight: 5, dashArray: "8 10", opacity: 0.9 }} />
+        )}
         <FlyTo lat={lat} lon={lon} />
         <ClickHandler onMapClick={handleMapClick} />
       </MapContainer>

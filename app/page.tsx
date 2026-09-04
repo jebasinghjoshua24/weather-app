@@ -17,6 +17,7 @@ import { WhatToWear } from "@/components/weather/WhatToWear";
 import { PollenPetCard } from "@/components/weather/PollenPetCard";
 import { WeatherTwin } from "@/components/weather/WeatherTwin";
 import { WeatherPlaylist } from "@/components/weather/WeatherPlaylist";
+import { RainShelterFinder } from "@/components/weather/RainShelterFinder";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -116,6 +117,8 @@ export default function HomePage() {
   const lon = location?.lon ?? null;
   const name = location?.name ?? DEFAULT_LOCATION.name;
   const { data, isPending, isError } = useWeatherData(lat, lon);
+  const [shelterRoute, setShelterRoute] = useState<[number, number][] | null>(null);
+  const [shelters, setShelters] = useState<Array<{ id: string; lat: number; lon: number; name: string }>>([]);
 
   const conditionKey = data ? getConditionKey(data.current.weatherCode, data.current.isDay) : "clear_day";
   const gradient = getBackgroundGradient(conditionKey);
@@ -273,9 +276,17 @@ export default function HomePage() {
               </div>
             </div>
 
+            <RainShelterFinder
+              lat={lat}
+              lon={lon}
+              weatherCode={data.current.weatherCode}
+              precipitation={data.current.precipitation}
+              onRoute={(g) => setShelterRoute(g as [number, number][])}
+              onShelters={(list) => setShelters(list)}
+            />
             <div className="grid grid-cols-12 gap-6">
               <div className="col-span-12 lg:col-span-7">
-                <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
+                <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} shelterRoute={shelterRoute} shelters={shelters} />
               </div>
               <div className="col-span-12 lg:col-span-5">
                 <DisasterAlerts location={lat != null && lon != null ? { lat, lon } : null} onFlyTo={(ev) => {
