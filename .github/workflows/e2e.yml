@@ -28,7 +28,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       # Playwright config's webServer (build + start) handles the server.
       # We only need to install browsers once, then run the tests.
@@ -36,6 +36,6 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        run: npm run test:e2e
+        run: npx playwright test --project=chromium
         env:
           CI: true
