@@ -46,10 +46,10 @@ const nextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           // Referrer policy: never leak URL params to external sites
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Permissions: only allow geolocation and microphone when the user explicitly asks
+          // Permissions: allow features used by YouTube embeds + geolocation
           {
             key: "Permissions-Policy",
-            value: "geolocation=(self), microphone=(self), camera=(), display-capture=(), fullscreen=()",
+            value: "geolocation=(self), microphone=(self), camera=(), display-capture=(), fullscreen=(self), accelerometer=(self), autoplay=(self), clipboard-write=(self), encrypted-media=(self), gyroscope=(self), picture-in-picture=(self)",
           },
           // Cross-Origin: prevent cross-origin attacks (credentialless allows OSM tiles without CORP)
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },

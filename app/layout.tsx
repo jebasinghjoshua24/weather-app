@@ -3,8 +3,8 @@ import { Space_Grotesk, JetBrains_Mono, Outfit, Roboto_Slab } from "next/font/go
 import "./globals.css";
 import { Providers } from "./providers";
 
-const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
+const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap", preload: false });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap", preload: false });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap", preload: false });
 const slab = Roboto_Slab({ subsets: ["latin"], variable: "--font-slab", display: "swap", weight: ["400", "700", "800"], preload: false });
 
