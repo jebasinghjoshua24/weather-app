@@ -17,23 +17,47 @@ function toDeg(r: number) {
   return (r * 180) / Math.PI;
 }
 
-/** Solar elevation in degrees (-90 to 90). */
-export function solarElevation(lat: number, lon: number, date: Date): { elevation: number; azimuth: number } {
+/** Solar elevation in degrees (-90 to 90). Timezone-aware via Intl. */
+export function solarElevation(
+  lat: number,
+  lon: number,
+  date: Date,
+  timeZone?: string
+): { elevation: number; azimuth: number } {
   const n = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
   const decl = 23.45 * Math.sin(toRad((360 * (284 + n)) / 365));
-  const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
-  const solarTime = utcHours + lon / 15;
-  const hourAngle = 15 * (solarTime - 12);
+  // Local solar time: use timezone if available, else UTC+lon
+  let localHours: number;
+  if (timeZone) {
+    try {
+      const fmt = new Intl.DateTimeFormat("en", {
+        timeZone,
+        hour: "numeric",
+        minute: "numeric",
+        hour12: false,
+      });
+      const parts = fmt.formatToParts(date);
+      const h = Number(parts.find((p) => p.type === "hour")?.value ?? "12");
+      const m = Number(parts.find((p) => p.type === "minute")?.value ?? "0");
+      localHours = h + m / 60;
+    } catch {
+      const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+      localHours = utcHours + lon / 15;
+    }
+  } else {
+    const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+    localHours = utcHours + lon / 15;
+  }
+  const hourAngle = 15 * (localHours - 12);
   const latRad = toRad(lat);
   const declRad = toRad(decl);
   const haRad = toRad(hourAngle);
   const elevRad = Math.asin(Math.sin(latRad) * Math.sin(declRad) + Math.cos(latRad) * Math.cos(declRad) * Math.cos(haRad));
   const elevation = toDeg(elevRad);
-  // Azimuth via cos formula (0 = north, clockwise)
   const azRad = Math.acos(
     (Math.sin(declRad) - Math.sin(elevRad) * Math.sin(latRad)) / (Math.cos(elevRad) * Math.cos(latRad) || 1)
   );
-  const azimuth = solarTime < 12 ? 360 - toDeg(azRad) : toDeg(azRad);
+  const azimuth = localHours < 12 ? 360 - toDeg(azRad) : toDeg(azRad);
   return { elevation, azimuth };
 }
 

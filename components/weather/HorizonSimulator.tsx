@@ -19,16 +19,19 @@ export function HorizonSimulator({
   const palette = useMemo(() => {
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
     const now = new Date();
-    // Use timezone-aware date: Intl handles offset, but elevation needs UTC + lon
-    // We approximate with local now + lon; timezone param keeps future DST hook
-    void timezone;
-    const { elevation } = solarElevation(lat, lon, now);
-    return { ...horizonPalette(elevation, cloudCover, isDay), elevation };
+    const { elevation } = solarElevation(lat, lon, now, timezone);
+    // Derive day/night from elevation when API isDay disagrees (e.g. -43° Day bug)
+    const derivedIsDay = elevation > -6 ? 1 : 0;
+    const effectiveIsDay = isDay ?? derivedIsDay;
+    return { ...horizonPalette(elevation, cloudCover, effectiveIsDay), elevation, derivedIsDay };
   }, [lat, lon, timezone, cloudCover, isDay]);
 
   if (!palette) return null;
 
-  const { top, mid, horizon, glow, elevation } = palette as ReturnType<typeof horizonPalette> & { elevation: number };
+  const { top, mid, horizon, glow, elevation, derivedIsDay } = palette as ReturnType<typeof horizonPalette> & {
+    elevation: number;
+    derivedIsDay: number;
+  };
 
   return (
     <div className="relative h-[180px] w-full overflow-hidden rounded-3xl border border-white/15 shadow-xl" aria-label={`Horizon at ${elevation.toFixed(0)} degrees elevation`}>
@@ -45,8 +48,9 @@ export function HorizonSimulator({
         />
       )}
       <div className="absolute inset-x-0 bottom-0 h-[1px] bg-white/20" />
-      <div className="absolute bottom-3 left-4 rounded-full bg-black/25 px-3 py-1 text-xs font-mono text-white backdrop-blur">
-        {elevation.toFixed(1)}° · {isDay === 0 ? "Night" : "Day"}
+      <div className="absolute bottom-3 left-4 rounded-full bg-black/30 px-3 py-1 text-xs font-mono text-white backdrop-blur">
+        {elevation.toFixed(1)}° · {derivedIsDay === 0 ? "Night" : "Day"}
+        {isDay != null && derivedIsDay !== isDay && <span className="opacity-60"> (API: {isDay === 0 ? "Night" : "Day"})</span>}
       </div>
     </div>
   );
