@@ -50,3 +50,13 @@ next-env.d.ts
 
 # biome / prettier cache
 node_modules/.cache/
+
+# strix
+strix.exe
+strix.zip
+strix-bin/
+strix-install.sh
+strix_runs/
+
+# skills cache
+.claude/
