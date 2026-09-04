@@ -12,6 +12,7 @@ import { WeatherVibe } from "@/components/weather/WeatherVibe";
 import { NewsFeed } from "@/components/weather/NewsFeed";
 import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
 import { HorizonSimulator } from "@/components/weather/HorizonSimulator";
+import { StargazingScore } from "@/components/weather/StargazingScore";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -249,8 +250,15 @@ export default function HomePage() {
               </div>
             </div>
             <div className="col-span-12">
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/30 backdrop-blur-md">
-                <HorizonSimulator lat={lat!} lon={lon!} timezone={data.timezone} cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                <div className="lg:col-span-8">
+                  <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/30 backdrop-blur-md">
+                    <HorizonSimulator lat={lat!} lon={lon!} timezone={data.timezone} cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
+                  </div>
+                </div>
+                <div className="lg:col-span-4">
+                  <StargazingScore cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
+                </div>
               </div>
             </div>
 
