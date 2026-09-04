@@ -51,6 +51,8 @@ export function MapView({
   disasters = [],
   shelters = [],
   shelterRoute = null,
+  radarPath = null,
+  radarHost = "",
 }: {
   lat: number;
   lon: number;
@@ -59,6 +61,8 @@ export function MapView({
   disasters?: EonetEvent[];
   shelters?: Array<{ id: string; lat: number; lon: number; name: string }>;
   shelterRoute?: [number, number][] | null;
+  radarPath?: string | null;
+  radarHost?: string;
 }) {
   const [clickPos, setClickPos] = useState<{ lat: number; lon: number } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -116,6 +120,9 @@ export function MapView({
         ))}
         {shelterRoute && shelterRoute.length > 1 && (
           <Polyline positions={shelterRoute} pathOptions={{ color: "#f59e0b", weight: 5, dashArray: "8 10", opacity: 0.9 }} />
+        )}
+        {radarPath && radarHost && (
+          <TileLayer url={`${radarHost}${radarPath}/256/{z}/{x}/{y}/2/1_1.png`} opacity={0.7} attribution='&copy; RainViewer' />
         )}
         <FlyTo lat={lat} lon={lon} />
         <ClickHandler onMapClick={handleMapClick} />

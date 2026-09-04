@@ -18,6 +18,7 @@ import { PollenPetCard } from "@/components/weather/PollenPetCard";
 import { WeatherTwin } from "@/components/weather/WeatherTwin";
 import { WeatherPlaylist } from "@/components/weather/WeatherPlaylist";
 import { RainShelterFinder } from "@/components/weather/RainShelterFinder";
+import { RadarTimeline } from "@/components/radar/RadarTimeline";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -119,6 +120,8 @@ export default function HomePage() {
   const { data, isPending, isError } = useWeatherData(lat, lon);
   const [shelterRoute, setShelterRoute] = useState<[number, number][] | null>(null);
   const [shelters, setShelters] = useState<Array<{ id: string; lat: number; lon: number; name: string }>>([]);
+  const [radarPath, setRadarPath] = useState<string | null>(null);
+  const [radarHost, setRadarHost] = useState<string>("");
 
   const conditionKey = data ? getConditionKey(data.current.weatherCode, data.current.isDay) : "clear_day";
   const gradient = getBackgroundGradient(conditionKey);
@@ -276,6 +279,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            <RadarTimeline onFrameChange={(host, path) => { setRadarHost(host); setRadarPath(path); }} />
             <RainShelterFinder
               lat={lat}
               lon={lon}
@@ -285,8 +289,8 @@ export default function HomePage() {
               onShelters={(list) => setShelters(list)}
             />
             <div className="grid grid-cols-12 gap-6">
-              <div className="col-span-12 lg:col-span-7">
-                <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} shelterRoute={shelterRoute} shelters={shelters} />
+              <div className="col-span-12 lg:col-span-7 space-y-3">
+                <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} shelterRoute={shelterRoute} shelters={shelters} radarPath={radarPath} radarHost={radarHost} />
               </div>
               <div className="col-span-12 lg:col-span-5">
                 <DisasterAlerts location={lat != null && lon != null ? { lat, lon } : null} onFlyTo={(ev) => {
