@@ -14,6 +14,7 @@ import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
 import { HorizonSimulator } from "@/components/weather/HorizonSimulator";
 import { StargazingScore } from "@/components/weather/StargazingScore";
 import { WhatToWear } from "@/components/weather/WhatToWear";
+import { PollenPetCard } from "@/components/weather/PollenPetCard";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -265,6 +266,7 @@ export default function HomePage() {
                     precipitation={data.current.precipitation}
                     weatherCode={data.current.weatherCode}
                   />
+                  <PollenPetCard lat={lat} lon={lon} temperature={data.current.temperature} isDay={data.current.isDay} />
                 </div>
               </div>
             </div>
