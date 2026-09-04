@@ -29,10 +29,11 @@ const nextConfig = {
               "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.rainviewer.com https://eonet.gsfc.nasa.gov https://*.supabase.co",
               // Frames: no one should embed our app
               "frame-ancestors 'none'",
+              "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
               // Workers: for service worker (PWA) + globe (WebGL)
               "worker-src 'self' blob:",
               // Media: for YouTube embeds (if used)
-              "media-src 'self' https://www.youtube.com",
+              "media-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
               // Base URI: no base tag hijacking
               "base-uri 'self'",
               // Form action: only submit to ourselves

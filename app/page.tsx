@@ -16,6 +16,7 @@ import { StargazingScore } from "@/components/weather/StargazingScore";
 import { WhatToWear } from "@/components/weather/WhatToWear";
 import { PollenPetCard } from "@/components/weather/PollenPetCard";
 import { WeatherTwin } from "@/components/weather/WeatherTwin";
+import { WeatherPlaylist } from "@/components/weather/WeatherPlaylist";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -288,6 +289,7 @@ export default function HomePage() {
 
             <NewsFeed country={location.country ?? null} />
             <WeatherTwin lat={lat} lon={lon} weather={data ?? null} />
+            <WeatherPlaylist weatherCode={data.current.weatherCode} isDay={data.current.isDay} />
           </div>
         )}
 
