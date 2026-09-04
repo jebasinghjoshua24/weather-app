@@ -19,7 +19,9 @@ import { WeatherTwin } from "@/components/weather/WeatherTwin";
 import { WeatherPlaylist } from "@/components/weather/WeatherPlaylist";
 import { RainShelterFinder } from "@/components/weather/RainShelterFinder";
 import { RadarTimeline } from "@/components/radar/RadarTimeline";
-import { LazyMap, LazyAura } from "@/lib/feature-registry";
+import { WeatherPostcard } from "@/components/weather/WeatherPostcard";
+import { WeatherDiary } from "@/components/weather/WeatherDiary";
+import { LazyMap, LazyAura, LazyGlobe } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
 import { Button } from "@/components/ui/button";
@@ -305,6 +307,15 @@ export default function HomePage() {
             <NewsFeed country={location.country ?? null} />
             <WeatherTwin lat={lat} lon={lon} weather={data ?? null} />
             <WeatherPlaylist weatherCode={data.current.weatherCode} isDay={data.current.isDay} />
+            <div className="grid grid-cols-12 gap-6">
+              <div className="col-span-12 lg:col-span-6">
+                <WeatherPostcard data={data} name={name} />
+              </div>
+              <div className="col-span-12 lg:col-span-6">
+                <WeatherDiary weather={data} location={location ? { name, lat: lat!, lon: lon! } : null} />
+              </div>
+            </div>
+            <LazyGlobe lat={lat!} lon={lon!} name={name} />
           </div>
         )}
 
