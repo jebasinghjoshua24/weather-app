@@ -24,7 +24,7 @@ export function WeatherPlaylist({
           height="200"
           src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1`}
           title={`${mood} playlist`}
-          allow="encrypted-media; picture-in-picture"
+          allow="picture-in-picture"
           allowFullScreen
           loading="lazy"
           referrerPolicy="strict-origin-when-cross-origin"

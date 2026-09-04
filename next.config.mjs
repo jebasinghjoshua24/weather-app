@@ -51,10 +51,10 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "geolocation=(self), microphone=(self), camera=(), display-capture=(), fullscreen=(self), accelerometer=(self), autoplay=(self), clipboard-write=(self), encrypted-media=(self), gyroscope=(self), picture-in-picture=(self)",
           },
-          // Cross-Origin: prevent cross-origin attacks (credentialless allows OSM tiles without CORP)
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
-          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+          // Cross-Origin: relaxed for YouTube + OSM (Zen/Firefox strict COEP would block otherwise)
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+          { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
         ],
       },
       // Allow the OSM tile server to render our map tiles
