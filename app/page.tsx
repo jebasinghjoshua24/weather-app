@@ -15,6 +15,7 @@ import { HorizonSimulator } from "@/components/weather/HorizonSimulator";
 import { StargazingScore } from "@/components/weather/StargazingScore";
 import { WhatToWear } from "@/components/weather/WhatToWear";
 import { PollenPetCard } from "@/components/weather/PollenPetCard";
+import { WeatherTwin } from "@/components/weather/WeatherTwin";
 import { LazyMap, LazyAura } from "@/lib/feature-registry";
 import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
@@ -286,6 +287,7 @@ export default function HomePage() {
             </div>
 
             <NewsFeed country={location.country ?? null} />
+            <WeatherTwin lat={lat} lon={lon} weather={data ?? null} />
           </div>
         )}
 
