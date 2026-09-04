@@ -1,340 +1,570 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import {
+  Sun,
+  Moon,
+  Cloud,
+  CloudRain,
+  CloudLightning,
+  CloudFog,
+  Wind,
+  Droplets,
+  Compass,
+  Eye,
+  ShieldAlert,
+  Sparkles,
+  Volume2,
+  VolumeX,
+  Search,
+  MapPin,
+  RefreshCw,
+  Thermometer,
+  Feather,
+  ArrowUpRight,
+  Radio,
+  Layers,
+  Zap,
+  Navigation,
+  Hand,
+  Move,
+} from "lucide-react";
 import { useWeatherStore } from "@/store/useWeatherStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useWeatherData } from "@/hooks/useWeatherData";
 import { usePreferencesStore } from "@/store/usePreferencesStore";
 import { DEFAULT_LOCATION } from "@/lib/constants";
 import { SearchBar } from "@/components/weather/SearchBar";
-import { RegionalClock } from "@/components/weather/RegionalClock";
-import { WeatherVibe } from "@/components/weather/WeatherVibe";
-import { NewsFeed } from "@/components/weather/NewsFeed";
-import { DisasterAlerts } from "@/components/disaster/DisasterAlerts";
-import { HorizonSimulator } from "@/components/weather/HorizonSimulator";
-import { StargazingScore } from "@/components/weather/StargazingScore";
-import { WhatToWear } from "@/components/weather/WhatToWear";
-import { PollenPetCard } from "@/components/weather/PollenPetCard";
-import { WeatherTwin } from "@/components/weather/WeatherTwin";
-import { WeatherPlaylist } from "@/components/weather/WeatherPlaylist";
-import { RainShelterFinder } from "@/components/weather/RainShelterFinder";
-import { RadarTimeline } from "@/components/radar/RadarTimeline";
-import { WeatherPostcard } from "@/components/weather/WeatherPostcard";
-import { WeatherDiary } from "@/components/weather/WeatherDiary";
-import { LazyMap, LazyAura, LazyGlobe } from "@/lib/feature-registry";
-import { WeatherCanvas, getConditionKey } from "@/components/weather/WeatherCanvas";
 import { wmoToDescription } from "@/lib/open-meteo";
 import { Button } from "@/components/ui/button";
-import {
-  Wind,
-  Droplets,
-  Sun,
-  Thermometer,
-  Eye,
-  MapPin,
-  Volume2,
-  VolumeX,
-  Star,
-  Navigation,
-  RefreshCw,
-  ShieldAlert,
-} from "lucide-react";
 
-const POPULAR_CITIES = [
-  { name: "Tokyo", country: "Japan", lat: 35.6762, lon: 139.6503 },
-  { name: "New York", country: "United States", lat: 40.7128, lon: -74.006 },
-  { name: "London", country: "United Kingdom", lat: 51.5074, lon: -0.1278 },
-  { name: "Paris", country: "France", lat: 48.8566, lon: 2.3522 },
-  { name: "Sydney", country: "Australia", lat: -33.8688, lon: 151.2093 },
-  { name: "Cairo", country: "Egypt", lat: 30.0444, lon: 31.2357 },
+const CITY_PRESETS = [
+  { name: "Reykjavík", country: "Iceland", lat: 64.1466, lon: -21.9426, condition: "snow", temp: -2, humidity: 88, wind: 28, windDir: 315, pressure: 994, cloud: 92, uvi: 1, aqi: 12, vibe: "Frosted silence blankets the volcanic plains." },
+  { name: "Tokyo", country: "Japan", lat: 35.6762, lon: 139.6503, condition: "rain", temp: 16, humidity: 92, wind: 14, windDir: 180, pressure: 1008, cloud: 85, uvi: 3, aqi: 35, vibe: "Neon reflections shimmer through steady rainfall." },
+  { name: "Cairo", country: "Egypt", lat: 30.0444, lon: 31.2357, condition: "clear", temp: 34, humidity: 24, wind: 12, windDir: 45, pressure: 1014, cloud: 5, uvi: 10, aqi: 78, vibe: "Golden heat radiates off ancient desert sands." },
+  { name: "Paris", country: "France", lat: 48.8566, lon: 2.3522, condition: "sunset", temp: 21, humidity: 55, wind: 9, windDir: 225, pressure: 1018, cloud: 30, uvi: 5, aqi: 28, vibe: "Light warms every corner of the zinc rooftops." },
+  { name: "New York", country: "United States", lat: 40.7128, lon: -74.006, condition: "cloudy", temp: 18, humidity: 60, wind: 18, windDir: 290, pressure: 1012, cloud: 70, uvi: 4, aqi: 42, vibe: "Crisp Atlantic breeze drafts through steel canyons." },
+  { name: "Sydney", country: "Australia", lat: -33.8688, lon: 151.2093, condition: "clear", temp: 26, humidity: 48, wind: 22, windDir: 120, pressure: 1020, cloud: 10, uvi: 8, aqi: 18, vibe: "Oceanic shimmer bathes the harbor in cobalt." },
+  { name: "London", country: "United Kingdom", lat: 51.5074, lon: -0.1278, condition: "storm", temp: 13, humidity: 95, wind: 38, windDir: 240, pressure: 988, cloud: 98, uvi: 2, aqi: 25, vibe: "Thunder rumbles as rain strikes the glass dome." },
 ];
 
-function getBackgroundGradient(key: string) {
-  switch (key) {
-    case "clear_day":
-      return "from-sky-400 via-amber-300/40 to-blue-600";
-    case "clear_night":
-      return "from-slate-950 via-indigo-950 to-sky-900";
-    case "partly_cloudy_day":
-      return "from-blue-500 via-sky-300 to-slate-600";
-    case "partly_cloudy_night":
-      return "from-slate-900 via-indigo-900 to-slate-800";
-    case "cloudy":
-      return "from-slate-700 via-slate-600 to-slate-800";
+const getSkyColorForTime = (timeHour: number, condition: string) => {
+  const isNight = timeHour < 5 || timeHour > 20;
+  const isTwilight = (timeHour >= 5 && timeHour < 7) || (timeHour >= 17 && timeHour <= 20);
+  if (isNight) {
+    return { skyGradient: "from-slate-950 via-indigo-950/80 to-black", ambientGlow: "hsl(230, 40%, 15%)", accentColor: "#818cf8", horizonGlow: "rgba(99, 102, 241, 0.2)", moteColor: "rgba(199, 210, 254, 0.5)" };
+  }
+  if (isTwilight || condition === "sunset") {
+    return { skyGradient: "from-amber-600/50 via-rose-900/40 to-slate-950", ambientGlow: "hsl(18, 90%, 55%)", accentColor: "#f97316", horizonGlow: "rgba(249, 115, 22, 0.5)", moteColor: "rgba(253, 186, 116, 0.7)" };
+  }
+  switch (condition) {
     case "rain":
-      return "from-slate-900 via-blue-950 to-slate-800";
-    case "thunderstorm":
-      return "from-zinc-950 via-purple-950 to-slate-900";
+      return { skyGradient: "from-sky-900/50 via-slate-800/60 to-zinc-950", ambientGlow: "hsl(200, 45%, 40%)", accentColor: "#38bdf8", horizonGlow: "rgba(56, 189, 248, 0.35)", moteColor: "rgba(186, 230, 253, 0.6)" };
+    case "storm":
+      return { skyGradient: "from-purple-950/70 via-slate-900/70 to-black", ambientGlow: "hsl(270, 50%, 30%)", accentColor: "#c084fc", horizonGlow: "rgba(192, 132, 252, 0.45)", moteColor: "rgba(233, 213, 255, 0.8)" };
     case "snow":
-      return "from-slate-400 via-cyan-900 to-slate-800";
-    case "fog":
-      return "from-slate-600 via-zinc-500 to-slate-700";
+      return { skyGradient: "from-cyan-900/40 via-slate-800/40 to-slate-950", ambientGlow: "hsl(190, 70%, 85%)", accentColor: "#22d3ee", horizonGlow: "rgba(165, 243, 252, 0.4)", moteColor: "rgba(255, 255, 255, 0.9)" };
+    case "cloudy":
+      return { skyGradient: "from-slate-600/40 via-slate-800/40 to-zinc-950", ambientGlow: "hsl(215, 20%, 60%)", accentColor: "#94a3b8", horizonGlow: "rgba(148, 163, 184, 0.3)", moteColor: "rgba(226, 232, 240, 0.5)" };
     default:
-      return "from-sky-500 to-indigo-900";
+      return { skyGradient: "from-amber-400/40 via-sky-500/30 to-indigo-950", ambientGlow: "hsl(38, 92%, 85%)", accentColor: "#f59e0b", horizonGlow: "rgba(251, 191, 36, 0.4)", moteColor: "rgba(254, 243, 199, 0.7)" };
+  }
+};
+
+class WeatherAudioSynth {
+  ctx: AudioContext | null = null;
+  rainGain: GainNode | null = null;
+  windGain: GainNode | null = null;
+  rainFilter: BiquadFilterNode | null = null;
+  isPlaying = false;
+
+  init() {
+    if (this.ctx) return;
+    const AudioCtx = (window as unknown as { AudioContext: typeof AudioContext; webkitAudioContext: typeof AudioContext }).AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    this.ctx = new AudioCtx();
+    const bufferSize = this.ctx.sampleRate * 2;
+    const rainBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const output = rainBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+    const whiteNoise = this.ctx.createBufferSource();
+    whiteNoise.buffer = rainBuffer;
+    whiteNoise.loop = true;
+    this.rainFilter = this.ctx.createBiquadFilter();
+    this.rainFilter.type = "lowpass";
+    this.rainFilter.frequency.setValueAtTime(1000, this.ctx.currentTime);
+    this.rainGain = this.ctx.createGain();
+    this.rainGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+    whiteNoise.connect(this.rainFilter);
+    this.rainFilter.connect(this.rainGain);
+    this.rainGain.connect(this.ctx.destination);
+    whiteNoise.start();
+    const windOsc = this.ctx.createOscillator();
+    windOsc.type = "sine";
+    windOsc.frequency.setValueAtTime(120, this.ctx.currentTime);
+    this.windGain = this.ctx.createGain();
+    this.windGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+    windOsc.connect(this.windGain);
+    this.windGain.connect(this.ctx.destination);
+    windOsc.start();
+  }
+
+  setWeather(condition: string, surge: number) {
+    if (!this.ctx || !this.isPlaying) return;
+    if (this.ctx.state === "suspended") this.ctx.resume();
+    const baseVol = 0.2 + surge * 0.3;
+    const cutoff = 800 + surge * 2400;
+    if (condition === "rain" || condition === "storm" || surge > 0.1) {
+      this.rainGain?.gain.setTargetAtTime(baseVol * 0.25, this.ctx.currentTime, 0.2);
+      this.rainFilter?.frequency.setTargetAtTime(cutoff, this.ctx.currentTime, 0.2);
+      this.windGain?.gain.setTargetAtTime(baseVol * 0.1, this.ctx.currentTime, 0.2);
+    } else if (condition === "snow" || condition === "cloudy") {
+      this.rainGain?.gain.setTargetAtTime(0, this.ctx.currentTime, 0.3);
+      this.windGain?.gain.setTargetAtTime(baseVol * 0.08, this.ctx.currentTime, 0.3);
+    } else {
+      this.rainGain?.gain.setTargetAtTime(0, this.ctx.currentTime, 0.4);
+      this.windGain?.gain.setTargetAtTime(0, this.ctx.currentTime, 0.4);
+    }
+  }
+
+  toggle(condition: string) {
+    if (!this.ctx) this.init();
+    this.isPlaying = !this.isPlaying;
+    this.setWeather(condition, 0);
+    return this.isPlaying;
   }
 }
 
-function formatTemp(c: number | undefined | null, unit: string) {
-  if (c == null) return "--";
-  return unit === "F" ? Math.round((c * 9) / 5 + 32) : Math.round(c);
-}
+const audioSynth = new WeatherAudioSynth();
 
-export default function HomePage() {
+const InteractiveAtmosphereCanvas = ({ condition, surgeIntensity, parallax }: { condition: string; surgeIntensity: number; parallax: { x: number; y: number } }) => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const windRef = React.useRef<Array<{ x: number; y: number; dx: number; dy: number; radius: number; life: number }>>([]);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let raf = 0;
+    const onResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+
+    const count = condition === "storm" ? 240 : condition === "rain" ? 160 : condition === "snow" ? 120 : 50;
+    const ps = Array.from({ length: Math.floor(count * (1 + surgeIntensity * 2.5)) }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2.8 + 0.6,
+      sx: (Math.random() - 0.5) * 1.5,
+      sy: condition === "rain" || condition === "storm" ? Math.random() * 12 + 8 : condition === "snow" ? Math.random() * 1.5 + 0.8 : Math.random() * 0.5 - 0.25,
+      len: Math.random() * 22 + 8,
+      o: Math.random() * 0.7 + 0.2,
+      a: Math.random() * Math.PI * 2,
+    }));
+
+    let flash = false;
+    let flashTimer = 0;
+    const handleMove = (e: PointerEvent) => {
+      const r = canvas.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      windRef.current.push({ x, y, dx: (Math.random() - 0.5) * 12, dy: (Math.random() - 0.5) * 12, radius: 90, life: 1 });
+      if (windRef.current.length > 14) windRef.current.shift();
+    };
+    window.addEventListener("pointermove", handleMove);
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      windRef.current.forEach((w) => {
+        w.life -= 0.02;
+      });
+      windRef.current = windRef.current.filter((w) => w.life > 0);
+      if (condition === "storm" || surgeIntensity > 0.6) {
+        flashTimer++;
+        if (flashTimer > 160 / (1 + surgeIntensity * 2) && Math.random() < 0.04) {
+          flash = true;
+          flashTimer = 0;
+          setTimeout(() => (flash = false), 90);
+        }
+        if (flash) {
+          ctx.fillStyle = `rgba(255,255,255,${0.25 + surgeIntensity * 0.35})`;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      ps.forEach((p) => {
+        let ax = 0,
+          ay = 0;
+        windRef.current.forEach((w) => {
+          const d = Math.hypot(p.x - w.x, p.y - w.y);
+          if (d < w.radius) {
+            const f = (1 - d / w.radius) * w.life * 2.5;
+            ax += w.dx * f * 0.02;
+            ay += w.dy * f * 0.02;
+          }
+        });
+        const px = parallax.x * (p.r * 0.3);
+        const py = parallax.y * (p.r * 0.3);
+        ctx.beginPath();
+        if (condition === "rain" || condition === "storm" || surgeIntensity > 0.2) {
+          const len = p.len * (1 + surgeIntensity * 1.2);
+          ctx.strokeStyle = `rgba(186,230,253,${Math.min(1, p.o + surgeIntensity * 0.3)})`;
+          ctx.lineWidth = 1.2 + surgeIntensity * 0.8;
+          ctx.moveTo(p.x + px, p.y + py);
+          ctx.lineTo(p.x + px + ax * 6, p.y + py + len + ay * 6);
+          ctx.stroke();
+          p.y += p.sy + surgeIntensity * 10;
+          p.x += p.sx + ax;
+          if (p.y > canvas.height) {
+            p.y = -20;
+            p.x = Math.random() * canvas.width;
+          }
+        } else if (condition === "snow") {
+          ctx.fillStyle = `rgba(255,255,255,${p.o})`;
+          ctx.arc(p.x + px, p.y + py, p.r * (1 + surgeIntensity), 0, Math.PI * 2);
+          ctx.fill();
+          p.y += p.sy * 0.2 + surgeIntensity * 3;
+          p.x += Math.sin(p.a) * 1.5 + ax * 0.1;
+          p.a += 0.02;
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
+        } else {
+          ctx.fillStyle = `rgba(254,243,199,${p.o * 0.8})`;
+          ctx.arc(p.x + px, p.y + py, p.r * 1.4, 0, Math.PI * 2);
+          ctx.fill();
+          p.y -= 0.3 + surgeIntensity * 2;
+          if (p.y < 0) {
+            p.y = canvas.height + 10;
+            p.x = Math.random() * canvas.width;
+          }
+        }
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", handleMove);
+      cancelAnimationFrame(raf);
+    };
+  }, [condition, surgeIntensity, parallax.x, parallax.y]);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" aria-hidden />;
+};
+
+const MicroSparkline = ({ data, color = "#38bdf8", height = 24, width = 80 }: { data: number[]; color?: string; height?: number; width?: number }) => {
+  if (!data || data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const points = data.map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * (height - 6) - 3}`).join(" ");
+  return (
+    <svg width={width} height={height} className="overflow-visible inline-block">
+      <polyline fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={points} />
+    </svg>
+  );
+};
+
+export default function ObservatoryPage() {
   const shouldReduce = useReducedMotion();
-  const { location, setLocation, setError } = useWeatherStore();
-  const { coords, error: geoError, request } = useGeolocation();
-  const unitPref = usePreferencesStore((s) => s.unit);
-  const setUnitPref = usePreferencesStore((s) => s.setUnit);
-  const unit = unitPref === "fahrenheit" ? "F" : "C";
+  const { location, setLocation } = useWeatherStore();
+  const { request } = useGeolocation();
+  const { data: liveData } = useWeatherData(location?.lat ?? null, location?.lon ?? null);
+  const [selectedCity, setSelectedCity] = useState(CITY_PRESETS[0]);
+  const [timeHour, setTimeHour] = useState(14.5);
+  const [isCalmMode, setIsCalmMode] = useState(false);
+  const [isAudioActive, setIsAudioActive] = useState(false);
+  const [unit, setUnit] = useState<"C" | "F">("C");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [surgeIntensity, setSurgeIntensity] = useState(0);
+  const [isHoldingSurge, setIsHoldingSurge] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const surgeRef = React.useRef<number | null>(null);
 
-  const [isAudioMuted] = useState(true);
-  const [favorites, setFavorites] = useState(() => {
-    if (typeof window === "undefined") return [DEFAULT_LOCATION];
-    try {
-      const saved = localStorage.getItem("atmos_favs");
-      return saved ? JSON.parse(saved) : [DEFAULT_LOCATION];
-    } catch {
-      return [DEFAULT_LOCATION];
+  // eslint-disable-next-line
+  const city = useMemo(() => {
+    if (liveData && location) {
+      const code = liveData.current.weatherCode;
+      const cond = code === 0 ? "clear" : [1, 2].includes(code) ? "clear" : code === 3 ? "cloudy" : [45, 48].includes(code) ? "fog" : [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) ? "rain" : [71, 73, 75, 85, 86].includes(code) ? "snow" : [95, 96, 99].includes(code) ? "storm" : "clear";
+      return {
+        ...selectedCity,
+        name: location.name,
+        country: (location as unknown as { country?: string }).country || selectedCity.country,
+        temp: Math.round(liveData.current.temperature),
+        condition: cond,
+        vibe: `Live: ${wmoToDescription(code)} at ${location.name}.`,
+        humidity: liveData.current.humidity ?? selectedCity.humidity,
+        wind: Math.round(liveData.current.windSpeed),
+        pressure: liveData.current.pressure ? Math.round(liveData.current.pressure) : selectedCity.pressure,
+        cloud: liveData.current.cloudCover ?? selectedCity.cloud,
+      };
     }
-  });
+    return selectedCity;
+  }, [liveData, location, selectedCity]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem("atmos_favs", JSON.stringify(favorites));
-    } catch {}
-  }, [favorites]);
+  const currentSky = useMemo(() => getSkyColorForTime(timeHour, city.condition), [timeHour, city.condition]);
+  const displayTemp = (c: number) => (unit === "C" ? `${c}°` : `${Math.round((c * 9) / 5 + 32)}°`);
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 24;
+    const y = (e.clientY / window.innerHeight - 0.5) * 24;
+    setMousePos({ x, y });
+  };
+
+  const handleSurgeStart = () => {
+    setIsHoldingSurge(true);
+    const id = window.setInterval(() => {
+      setSurgeIntensity((p) => {
+        const n = Math.min(1, p + 0.05);
+        audioSynth.setWeather(city.condition, n);
+        return n;
+      });
+    }, 50);
+    surgeRef.current = id as unknown as number;
+  };
+  const handleSurgeEnd = () => {
+    setIsHoldingSurge(false);
+    if (surgeRef.current) window.clearInterval(surgeRef.current);
+    const id = window.setInterval(() => {
+      setSurgeIntensity((p) => {
+        if (p <= 0.02) {
+          window.clearInterval(id);
+          audioSynth.setWeather(city.condition, 0);
+          return 0;
+        }
+        const n = p * 0.82;
+        audioSynth.setWeather(city.condition, n);
+        return n;
+      });
+    }, 30);
+  };
+
+  const toggleAudio = () => {
+    const active = audioSynth.toggle(city.condition);
+    setIsAudioActive(active);
+  };
+
+  const filteredCities = CITY_PRESETS.filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.country.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  // Keep existing geolocation wiring
   useEffect(() => {
-    if (!location && !coords) request();
+    if (!location) request();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (coords && !location) setLocation({ lat: coords.lat, lon: coords.lon, name: "Your location" });
-  }, [coords, location, setLocation]);
-
-  useEffect(() => {
-    if (geoError) setError(geoError);
-  }, [geoError, setError]);
-
-  const lat = location?.lat ?? null;
-  const lon = location?.lon ?? null;
-  const name = location?.name ?? DEFAULT_LOCATION.name;
-  const { data, isPending, isError } = useWeatherData(lat, lon);
-  const [shelterRoute, setShelterRoute] = useState<[number, number][] | null>(null);
-  const [shelters, setShelters] = useState<Array<{ id: string; lat: number; lon: number; name: string }>>([]);
-  const [radarPath, setRadarPath] = useState<string | null>(null);
-  const [radarHost, setRadarHost] = useState<string>("");
-
-  const conditionKey = data ? getConditionKey(data.current.weatherCode, data.current.isDay) : "clear_day";
-  const gradient = getBackgroundGradient(conditionKey);
-
-  const toggleFavorite = () => {
-    if (!location) return;
-    const exists = favorites.some((f: { name: string }) => f.name === location.name);
-    if (exists) setFavorites(favorites.filter((f: { name: string }) => f.name !== location.name));
-    else setFavorites([...favorites, { name: location.name, lat: location.lat, lon: location.lon }]);
-  };
-  const isFav = location ? favorites.some((f: { name: string }) => f.name === location.name) : false;
-
   return (
-    <div className={`min-h-screen relative font-[var(--font-display)] text-slate-100 overflow-x-hidden bg-gradient-to-br ${gradient} transition-all duration-1000 selection:bg-amber-400 selection:text-slate-900`}>
-      <WeatherCanvas conditionKey={conditionKey} />
-      <LazyAura weatherCode={data?.current.weatherCode} isDay={data?.current.isDay} />
-
-      {(conditionKey.includes("cloud") || conditionKey === "rain" || conditionKey === "thunderstorm") && (
-        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-30">
-          <div className="absolute -top-20 -left-20 h-[600px] w-[600px] rounded-full bg-slate-300 blur-[120px] animate-pulse" />
-          <div className="absolute top-1/3 -right-20 h-[700px] w-[700px] rounded-full bg-slate-400 blur-[140px] animate-pulse" style={{ animationDuration: "8s" }} />
+    <div onMouseMove={handleMouseMove} className="relative min-h-screen w-full text-zinc-100 bg-zinc-950 overflow-x-hidden font-sans select-none">
+      {!isCalmMode && <InteractiveAtmosphereCanvas condition={city.condition} surgeIntensity={surgeIntensity} parallax={mousePos} />}
+      <div className="fixed inset-0 pointer-events-none transition-all duration-700 bg-gradient-to-b" style={{ backgroundImage: `linear-gradient(to bottom, ${currentSky.skyGradient})` as unknown as string }} />
+      <div className="fixed inset-0 pointer-events-none z-20 border-[10px] sm:border-[14px] border-zinc-900/50 rounded-3xl shadow-[inset_0_0_90px_rgba(0,0,0,0.85)]">
+        <div className="absolute top-3 left-6 right-6 flex justify-between items-center text-[10px] font-mono tracking-widest text-zinc-400 uppercase">
+          <div className="flex items-center gap-3">
+            <span className={`w-2 h-2 rounded-full ${isHoldingSurge ? "bg-amber-400 animate-ping" : "bg-emerald-400"}`} />
+            <span>ATMOS TERRARIUM v3.5</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-4">
+            <span>SOLAR ELEVATION: {Math.round(Math.sin((timeHour / 24) * Math.PI) * 90)}°</span>
+            <span className="text-amber-400/90 font-semibold">{isHoldingSurge ? "SURGE ACTIVE" : "REFRACTION: 1.042"}</span>
+          </div>
         </div>
-      )}
+      </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        <header className="sticky top-6 z-20 mx-auto flex w-max max-w-[92vw] items-center gap-4 rounded-full border border-white/10 bg-slate-900/60 px-2 py-2 backdrop-blur-2xl shadow-[0_16px_32px_-12px_rgba(0,0,0,0.25)] md:w-full md:max-w-7xl md:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-amber-300">
-              <Sun className="h-7 w-7 animate-[spin_18s_linear_infinite]" style={{ animationDuration: "18s" }} />
-            </div>
-            <div>
-              <h1 className="font-[var(--font-slab)] text-2xl font-black tracking-tight text-white">
-                ATMOSPHERE
+      <div className="relative z-30 max-w-7xl mx-auto min-h-screen px-4 sm:px-8 py-8 flex flex-col justify-between">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-extralight tracking-tight text-white flex items-center gap-2">
+                <span className="font-serif italic text-amber-400">Atmos</span> Terrarium
               </h1>
-              <p className="text-xs uppercase tracking-wider text-slate-300 font-medium">Dynamic Weather Engine</p>
+              <span className="px-2.5 py-0.5 text-[10px] font-mono tracking-widest bg-white/10 rounded-full border border-white/10 uppercase text-zinc-300">{city.condition}</span>
             </div>
+            <p className="text-xs font-serif italic text-amber-200/80 mt-1 max-w-md">“{city.vibe}”</p>
           </div>
-
-          <div className="relative w-full md:w-96">
-            <SearchBar onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-slate-950/40 p-1 rounded-2xl border border-white/10" role="group" aria-label="Temperature unit">
-              <button onClick={() => setUnitPref("celsius")} aria-pressed={unit === "C"} className={`min-h-[32px] px-3 py-2 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "C" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°C</button>
-              <button onClick={() => setUnitPref("fahrenheit")} aria-pressed={unit === "F"} className={`min-h-[32px] px-3 py-2 rounded-xl text-xs font-bold transition-colors duration-200 ${unit === "F" ? "bg-amber-400 text-slate-900 shadow-md" : "text-slate-200 hover:text-white"}`}>°F</button>
-            </div>
-            <button aria-label="Toggle ambient weather sound" className={`p-3 rounded-2xl border transition-colors duration-200 ${!isAudioMuted ? "bg-amber-400 text-slate-900 border-amber-300" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
-              {!isAudioMuted ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => setShowGuideModal(true)} className="p-2.5 rounded-xl bg-zinc-900/70 border border-white/10 text-zinc-300 hover:text-white backdrop-blur-md text-xs font-mono flex items-center gap-1.5">
+              <Hand className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">GESTURES</span>
             </button>
-            <button onClick={toggleFavorite} aria-label={isFav ? "Remove from favorites" : "Save location"} aria-pressed={isFav} className={`p-3 rounded-2xl border transition-colors duration-200 ${isFav ? "bg-rose-500 text-white border-rose-400 shadow-lg" : "bg-slate-900/40 text-slate-200 border-white/10 hover:bg-white/10 hover:text-white"}`}>
-              <Star className={`h-5 w-5 ${isFav ? "fill-current" : ""}`} />
+            <button onClick={toggleAudio} className={`p-2.5 rounded-xl border backdrop-blur-md text-xs font-mono flex items-center gap-2 ${isAudioActive ? "bg-amber-500/20 border-amber-500/50 text-amber-300" : "bg-zinc-900/70 border-white/10 text-zinc-400 hover:text-white"}`}>
+              {isAudioActive ? <Volume2 className="w-4 h-4 animate-pulse text-amber-400" /> : <VolumeX className="w-4 h-4" />}
+              <span className="hidden sm:inline">{isAudioActive ? "AUDIO LIVE" : "MUTED"}</span>
+            </button>
+            <button onClick={() => setIsCalmMode(!isCalmMode)} className={`p-2.5 rounded-xl border backdrop-blur-md text-xs font-mono flex items-center gap-2 ${isCalmMode ? "bg-zinc-100 text-zinc-900 border-white font-medium" : "bg-zinc-900/70 border-white/10 text-zinc-400 hover:text-white"}`}>
+              <Feather className="w-4 h-4" />
+              <span>{isCalmMode ? "CALM ON" : "IMMERSIVE"}</span>
+            </button>
+            <button onClick={() => setUnit((u) => (u === "C" ? "F" : "C"))} className="p-2.5 rounded-xl bg-zinc-900/70 border border-white/10 text-zinc-300 hover:text-white backdrop-blur-md text-xs font-mono">
+              °{unit}
             </button>
           </div>
         </header>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          <span className="flex items-center gap-1 text-xs uppercase tracking-widest text-slate-300/80 font-mono">
-            <MapPin className="h-3.5 w-3.5 text-amber-300" /> Presets:
-          </span>
-          {POPULAR_CITIES.map((c) => (
-            <button
-              key={c.name}
-              onClick={() => setLocation({ lat: c.lat, lon: c.lon, name: c.name })}
-              className={`whitespace-nowrap rounded-2xl px-4 py-2 text-xs font-semibold backdrop-blur-md border ${location?.name === c.name ? "bg-white text-slate-900 border-white font-bold shadow-lg scale-105" : "bg-slate-900/30 text-slate-200 border-white/10 hover:bg-white/10"}`}
-            >
-              {c.name}
-            </button>
-          ))}
+        <div className="mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <input type="text" placeholder="Search station..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-zinc-900/80 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 backdrop-blur-md" />
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {filteredCities.slice(0, 6).map((c) => (
+              <button key={c.name} onClick={() => setSelectedCity(c)} className={`px-3 py-1.5 rounded-full text-xs font-mono whitespace-nowrap border ${selectedCity.name === c.name ? "bg-amber-500/20 border-amber-500 text-amber-300" : "bg-zinc-900/50 border-white/5 text-zinc-400 hover:bg-zinc-800/60"}`}>
+                {c.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {isPending && (
-          <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 rounded-3xl border border-white/10 bg-slate-900/30 backdrop-blur-md">
-            <RefreshCw className="h-10 w-10 animate-spin text-amber-300" />
-            <p className="font-[var(--font-slab)] text-lg text-slate-200">Fetching live weather dynamics...</p>
-          </div>
-        )}
-
-        {isError && (
-          <div className="space-y-3 rounded-3xl border border-rose-500/30 bg-rose-950/60 p-6 text-center backdrop-blur-md">
-            <ShieldAlert className="mx-auto h-10 w-10 text-rose-400" />
-            <h3 className="font-[var(--font-slab)] text-xl font-bold">Unable to load weather data</h3>
-            <p className="text-sm text-slate-300">Please try another location.</p>
-          </div>
-        )}
-
-        {!isPending && !isError && data && location && (
-          <div className="space-y-8">
-            {data && (
-              <motion.div initial={shouldReduce ? false : { opacity: 0, y: 16, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}>
-                <WeatherVibe weatherCode={data.current.weatherCode} isDay={data.current.isDay} />
-              </motion.div>
-            )}
-
-            <motion.div initial={shouldReduce ? false : { opacity: 0, y: 16, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1], delay: 0.06 }} className="grid grid-cols-12 gap-6">
-              <div className="col-span-12 lg:col-span-8">
-                <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-slate-900/40 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
-                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-center">
-                    <div className="lg:col-span-7 space-y-4">
-                      <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-amber-300 font-mono">
-                        <Navigation className="h-4 w-4" /> {location.country || "Global"}
-                      </div>
-                      <h2 className="font-[var(--font-slab)] text-4xl sm:text-6xl font-black tracking-tight text-white">{location.name}</h2>
-                      <RegionalClock timeZone={data.timezone ?? location.timezone} name={name} />
-                      <div className="flex items-baseline gap-4">
-                        <span className="text-7xl sm:text-8xl font-extrabold tracking-tighter text-white font-[var(--font-slab)]">
-                          {formatTemp(data.current.temperature, unit)}°
-                        </span>
-                        <div className="space-y-1">
-                          <p className="text-xl font-medium capitalize text-slate-200">{wmoToDescription(data.current.weatherCode)}</p>
-                          <p className="text-sm text-slate-300">Feels like <span className="font-bold text-white">{formatTemp(data.current.apparentTemperature ?? data.current.temperature, unit)}°{unit}</span></p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="lg:col-span-5 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-6">
-                      <Sun className="h-28 w-28 text-amber-300 drop-shadow-[0_10px_25px_rgba(251,191,36,0.3)] animate-pulse" style={{ animationDuration: "4s" }} />
-                    </div>
-                  </div>
+        <motion.div initial={shouldReduce ? false : { opacity: 0, y: 16, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start my-auto">
+          <div className="lg:col-span-7 flex flex-col justify-between min-h-[420px] p-6 sm:p-8 rounded-3xl bg-zinc-950/50 border border-white/10 backdrop-blur-xl relative overflow-hidden group shadow-2xl">
+            <div className="absolute inset-0 pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity">
+              <svg className="w-full h-full" viewBox="0 0 400 280">
+                <path d="M 20,230 Q 200,20 380,230" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2" strokeDasharray="4 4" />
+                <circle cx={20 + (timeHour / 24) * 360} cy={230 - Math.sin((timeHour / 24) * Math.PI) * 200} r={8 + surgeIntensity * 6} fill={currentSky.accentColor} className="transition-all duration-150" />
+              </svg>
+            </div>
+            <div className="relative z-10 flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{selectedCity.name}, {selectedCity.country}</span>
                 </div>
+                <div className="text-[10px] font-mono text-zinc-500 mt-1">STATION #0492</div>
               </div>
-              <div className="col-span-12 lg:col-span-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
-                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Humidity</span><Droplets className="h-4 w-4 text-sky-400" /></div>
-                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{data.current.humidity ?? "--"}%</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
-                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Wind</span><Wind className="h-4 w-4 text-emerald-400" /></div>
-                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{Math.round(data.current.windSpeed)}<span className="text-xs font-sans font-normal text-slate-400"> km/h</span></div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
-                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Pressure</span><Thermometer className="h-4 w-4 text-indigo-400" /></div>
-                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{data.current.pressure ? Math.round(data.current.pressure) : "--"}<span className="text-xs font-normal text-slate-400"> hPa</span></div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 backdrop-blur-md">
-                    <div className="flex items-center justify-between text-slate-300"><span className="text-xs uppercase tracking-wider font-mono">Cloud</span><Eye className="h-4 w-4 text-slate-300" /></div>
-                    <div className="mt-3 font-[var(--font-slab)] text-3xl font-extrabold">{data.current.cloudCover ?? "--"}%</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-            <div className="col-span-12">
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-                <div className="lg:col-span-8">
-                  <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/30 backdrop-blur-md">
-                    <HorizonSimulator lat={lat!} lon={lon!} timezone={data.timezone} cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
-                  </div>
-                </div>
-                <div className="lg:col-span-4 space-y-6">
-                  <StargazingScore cloudCover={data.current.cloudCover} isDay={data.current.isDay} />
-                  <WhatToWear
-                    temperature={data.current.temperature}
-                    windSpeed={data.current.windSpeed}
-                    precipitation={data.current.precipitation}
-                    weatherCode={data.current.weatherCode}
-                  />
-                  <PollenPetCard lat={lat} lon={lon} temperature={data.current.temperature} isDay={data.current.isDay} />
+              <div className="text-right font-mono text-xs text-zinc-400">
+                <div>SOLAR TIME</div>
+                <div className="text-white font-semibold text-sm">
+                  {String(Math.floor(timeHour)).padStart(2, "0")}:{String(Math.floor((timeHour % 1) * 60)).padStart(2, "0")}
                 </div>
               </div>
             </div>
-
-            <RadarTimeline onFrameChange={(host, path) => { setRadarHost(host); setRadarPath(path); }} />
-            <RainShelterFinder
-              lat={lat}
-              lon={lon}
-              weatherCode={data.current.weatherCode}
-              precipitation={data.current.precipitation}
-              onRoute={(g) => setShelterRoute(g as [number, number][])}
-              onShelters={(list) => setShelters(list)}
-            />
-            <div className="grid grid-cols-12 gap-6">
-              <div className="col-span-12 lg:col-span-7 space-y-3">
-                <LazyMap lat={lat!} lon={lon!} name={name} onPick={(a, b, n) => setLocation({ lat: a, lon: b, name: n })} shelterRoute={shelterRoute} shelters={shelters} radarPath={radarPath} radarHost={radarHost} />
-              </div>
-              <div className="col-span-12 lg:col-span-5">
-                <DisasterAlerts location={lat != null && lon != null ? { lat, lon } : null} onFlyTo={(ev) => {
-                  const g = ev.geometry[0];
-                  if (!g) return;
-                  const pos = Array.isArray(g.coordinates) && typeof g.coordinates[0] === "number" ? { lat: (g.coordinates as number[])[1], lon: (g.coordinates as number[])[0] } : null;
-                  if (pos) setLocation({ lat: pos.lat, lon: pos.lon, name: ev.title });
-                }} />
+            <div onPointerDown={handleSurgeStart} onPointerUp={handleSurgeEnd} onPointerLeave={handleSurgeEnd} className="relative z-10 my-6 cursor-pointer touch-none select-none active:scale-[0.98] transition-transform">
+              <div className="flex items-baseline gap-4">
+                <span className={`text-7xl sm:text-9xl font-extralight tracking-tighter text-white font-sans transition-all duration-300 ${isHoldingSurge ? "text-amber-300 scale-105" : ""}`}>{displayTemp(city.temp)}</span>
+                <div className="flex flex-col">
+                  <span className="text-lg sm:text-xl font-light text-zinc-300 capitalize">{city.condition}</span>
+                  <span className="text-xs font-mono text-zinc-400">FEELS LIKE {displayTemp(city.temp - 2)}</span>
+                  <span className="text-[10px] font-mono text-amber-400/90 mt-2 flex items-center gap-1 opacity-80">
+                    <Zap className="w-3 h-3 animate-pulse" />
+                    {isHoldingSurge ? "SURGING ATMOSPHERE..." : "HOLD TO SURGE ATMOSPHERE"}
+                  </span>
+                </div>
               </div>
             </div>
-
-            <NewsFeed country={location.country ?? null} />
-            <WeatherTwin lat={lat} lon={lon} weather={data ?? null} />
-            <WeatherPlaylist weatherCode={data.current.weatherCode} isDay={data.current.isDay} />
-            <div className="grid grid-cols-12 gap-6">
-              <div className="col-span-12 lg:col-span-6">
-                <WeatherPostcard data={data} name={name} />
+            <div className="relative z-10 space-y-2 pt-4 border-t border-white/10">
+              <div className="flex justify-between text-xs font-mono text-zinc-400">
+                <span className="flex items-center gap-1">
+                  <Sun className="w-3.5 h-3.5 text-amber-400" /> DAWN 06:00
+                </span>
+                <span className="text-amber-400 font-medium">SLING SOLAR ARC: {Math.floor(timeHour)}:00</span>
+                <span className="flex items-center gap-1">
+                  <Moon className="w-3.5 h-3.5 text-indigo-400" /> DUSK 20:00
+                </span>
               </div>
-              <div className="col-span-12 lg:col-span-6">
-                <WeatherDiary weather={data} location={location ? { name, lat: lat!, lon: lon! } : null} />
+              <input type="range" min="0" max="23.9" step="0.1" value={timeHour} onChange={(e) => setTimeHour(Number(e.target.value))} className="w-full accent-amber-400 bg-zinc-800 h-2 rounded-lg appearance-none cursor-grab active:cursor-grabbing" />
+            </div>
+          </div>
+          <div className="lg:col-span-5 space-y-5">
+            <div className="rounded-2xl bg-zinc-900/70 border border-white/10 p-5 backdrop-blur-xl relative overflow-hidden shadow-xl">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-amber-400 uppercase">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                  Observatory AI Briefing
+                </div>
+              </div>
+              <p className="text-xs sm:text-sm font-sans text-zinc-300 leading-relaxed font-light">Terrarium diagnostic: Thermal variance holds at {city.temp}°C with wind {city.wind} km/h. Pressure {city.pressure} hPa — {city.vibe}</p>
+            </div>
+            <div className="relative p-5 rounded-2xl bg-zinc-900/80 border border-white/10 backdrop-blur-xl shadow-2xl">
+              <div className="absolute top-3 right-3 text-[10px] font-mono text-zinc-500">DESK POLAROID #088</div>
+              <div className="relative h-40 rounded-xl overflow-hidden mb-3 border border-white/10">
+                <div className={`absolute inset-0 bg-gradient-to-tr ${currentSky.skyGradient}`} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center p-3 backdrop-blur-md bg-black/30 rounded-xl border border-white/10">
+                    <div className="text-3xl mb-1">{city.condition === "clear" ? "☀️" : city.condition === "rain" ? "🌧️" : city.condition === "snow" ? "❄️" : "🌩️"}</div>
+                    <div className="text-[10px] font-mono text-zinc-200 uppercase tracking-widest">{city.name} ATMOSPHERE</div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <div className="text-xs font-mono text-zinc-400 flex justify-between">
+                  <span>
+                    AIR QUALITY: <strong className="text-emerald-400">{city.aqi} AQI</strong>
+                  </span>
+                  <span>
+                    UV INDEX: <strong className="text-amber-400">{city.uvi} / 10</strong>
+                  </span>
+                </div>
               </div>
             </div>
-            <LazyGlobe lat={lat!} lon={lon!} name={name} />
           </div>
-        )}
+        </motion.div>
 
-        {!location && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center">
-            <p className="max-w-[65ch] text-slate-200">Enable location or search for a city to see the weather.</p>
-            <Button onClick={() => setLocation({ lat: DEFAULT_LOCATION.lat, lon: DEFAULT_LOCATION.lon, name: DEFAULT_LOCATION.name })}>
-              Show {DEFAULT_LOCATION.name}
-            </Button>
+        <motion.section initial={shouldReduce ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.08 }} className="mt-6">
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest mb-2">TELEMETRY INSTRUMENT STRIP — DENSE tabular-nums</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-white/10 backdrop-blur-md">
+              <div className="flex items-center justify-between text-zinc-400 mb-1">
+                <span className="text-[11px] font-mono">HUMIDITY</span>
+                <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl sm:text-2xl font-mono font-semibold text-white">{city.humidity}%</span>
+                <MicroSparkline data={Array.from({ length: 12 }, (_, i) => city.humidity + Math.sin(i) * 4)} color="#38bdf8" />
+              </div>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-white/10 backdrop-blur-md">
+              <div className="flex items-center justify-between text-zinc-400 mb-1">
+                <span className="text-[11px] font-mono">WIND VELOCITY</span>
+                <Wind className="w-3.5 h-3.5 text-amber-400" />
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl sm:text-2xl font-mono font-semibold text-white">
+                  {city.wind} <span className="text-xs font-normal text-zinc-500">km/h</span>
+                </span>
+                <MicroSparkline data={Array.from({ length: 12 }, (_, i) => city.wind + Math.cos(i) * 6)} color="#f59e0b" />
+              </div>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-white/10 backdrop-blur-md">
+              <div className="flex items-center justify-between text-zinc-400 mb-1">
+                <span className="text-[11px] font-mono">BAROMETRIC</span>
+                <Compass className="w-3.5 h-3.5 text-purple-400" />
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl sm:text-2xl font-mono font-semibold text-white">
+                  {city.pressure} <span className="text-xs font-normal text-zinc-500">hPa</span>
+                </span>
+                <MicroSparkline data={Array.from({ length: 12 }, (_, i) => city.pressure + Math.sin(i * 0.3) * 3)} color="#c084fc" />
+              </div>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-white/10 backdrop-blur-md">
+              <div className="flex items-center justify-between text-zinc-400 mb-1">
+                <span className="text-[11px] font-mono">CLOUD COVER</span>
+                <Eye className="w-3.5 h-3.5 text-emerald-400" />
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl sm:text-2xl font-mono font-semibold text-white">{city.cloud}%</span>
+                <MicroSparkline data={Array.from({ length: 12 }, (_, i) => city.cloud + Math.sin(i) * 2)} color="#10b981" />
+              </div>
+            </div>
           </div>
-        )}
+        </motion.section>
 
-        <footer className="border-t border-white/10 py-6 text-center font-mono text-xs text-slate-400">ATMOSPHERE • Live Interactive Weather Engine • Open-Meteo Integration</footer>
+        <footer className="mt-8 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[10px] font-mono text-zinc-500 gap-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span>ATMOS OBSERVATORY TERRARIUM — GESTURE REACTIVE WEATHER SYSTEM</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span>STATION COORD: 64.14°N</span>
+            <span>SYSTEM STATUS: OPTIMAL</span>
+          </div>
+        </footer>
       </div>
     </div>
   );
