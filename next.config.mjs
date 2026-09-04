@@ -17,8 +17,8 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // Scripts: allow self + next.js inline scripts (hashed by Next)
-              "script-src 'self' 'unsafe-inline'",
+              // Scripts: allow self + next.js inline scripts (hashed by Next) — unsafe-eval only in dev for React Fast Refresh
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
               // Styles: allow self + inline styles (next.js + tailwind)
               "style-src 'self' 'unsafe-inline'",
               // Images: allow self + OSM tiles + RainViewer + YouTube + Open-Meteo placeholders
