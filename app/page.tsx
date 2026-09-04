@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { useWeatherStore } from "@/store/useWeatherStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useWeatherData } from "@/hooks/useWeatherData";
@@ -80,6 +81,7 @@ function formatTemp(c: number | undefined | null, unit: string) {
 }
 
 export default function HomePage() {
+  const shouldReduce = useReducedMotion();
   const { location, setLocation, setError } = useWeatherStore();
   const { coords, error: geoError, request } = useGeolocation();
   const unitPref = usePreferencesStore((s) => s.unit);
@@ -149,7 +151,7 @@ export default function HomePage() {
       )}
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        <header className="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/40 backdrop-blur-md p-4 rounded-3xl border border-white/10 shadow-2xl">
+        <header className="sticky top-6 z-20 mx-auto flex w-max max-w-[92vw] items-center gap-4 rounded-full border border-white/10 bg-slate-900/60 px-2 py-2 backdrop-blur-2xl shadow-[0_16px_32px_-12px_rgba(0,0,0,0.25)] md:w-full md:max-w-7xl md:justify-between">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-amber-300">
               <Sun className="h-7 w-7 animate-[spin_18s_linear_infinite]" style={{ animationDuration: "18s" }} />
@@ -212,9 +214,13 @@ export default function HomePage() {
 
         {!isPending && !isError && data && location && (
           <div className="space-y-8">
-            {data && <WeatherVibe weatherCode={data.current.weatherCode} isDay={data.current.isDay} />}
+            {data && (
+              <motion.div initial={shouldReduce ? false : { opacity: 0, y: 16, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}>
+                <WeatherVibe weatherCode={data.current.weatherCode} isDay={data.current.isDay} />
+              </motion.div>
+            )}
 
-            <div className="grid grid-cols-12 gap-6">
+            <motion.div initial={shouldReduce ? false : { opacity: 0, y: 16, filter: "blur(6px)" }} whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1], delay: 0.06 }} className="grid grid-cols-12 gap-6">
               <div className="col-span-12 lg:col-span-8">
                 <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-slate-900/40 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
                   <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-center">
@@ -260,7 +266,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
             <div className="col-span-12">
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                 <div className="lg:col-span-8">

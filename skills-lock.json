@@ -14,6 +14,12 @@
       "computedHash": "cdb9293f9d8461b525a42949d5f3509754c42efa2eab11f20d406b16270eb867",
       "wellKnownDigest": "sha256:c3dc1a035894db5e60d3cde5e06147c660220f1cffacf8b7469b80f12309bc08"
     },
+    "awesome-design-md": {
+      "source": "wearescientist/awesome-design-md",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "a5987926a560c8415f1d4d54b94f90fd1824f623d8be590a879393da3a67def4"
+    },
     "design-taste-frontend": {
       "source": "leonxlnx/taste-skill",
       "sourceType": "github",
@@ -44,6 +50,12 @@
       "skillPath": ".agents/skills/impeccable/SKILL.md",
       "computedHash": "ce6cef1f4c7fd1599bc78cd87101d2cee21d0a0a9042cfe7d574f719bb40ebe1"
     },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "235fc46cba70822cb151893d1819314f6eedcd263434272f9d8341e92fdbd29e"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
@@ -69,6 +81,12 @@
       "sourceType": "well-known",
       "computedHash": "34305420bba52f3fe7d1d3b2dd355b64ccf12de7411cbbf4557a1231e8ef8ddb",
       "wellKnownDigest": "sha256:461cf4d25b9e74840cb6f20ab81751ec5352dbcb28dac8e3bce001602965279e"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
     }
   }
 }

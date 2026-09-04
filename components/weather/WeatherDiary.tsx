@@ -20,6 +20,7 @@ export function WeatherDiary({ weather, location }: { weather?: WeatherResponse 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate from localStorage once on mount
       if (raw) setEntries(JSON.parse(raw) as DiaryEntry[]);
     } catch {}
     // Try Supabase load if signed in

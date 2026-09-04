@@ -26,7 +26,6 @@ describe.skipIf(!hasCreds)("RLS integration — cross-tenant (requires Supabase 
   // Skips if service_role not provided (keep CI green without secrets).
   it.skipIf(!serviceKey)("tenant A cannot read tenant B's diary", async () => {
     const admin = createClient(url!, serviceKey!);
-    const anon = createClient(url!, anonKey!);
 
     // Create two test users via admin (email + password, auto-confirm if enabled)
     const emailA = `rls-a-${Date.now()}@example.test`;
@@ -53,9 +52,7 @@ describe.skipIf(!hasCreds)("RLS integration — cross-tenant (requires Supabase 
       // Sign in as A and insert a diary row
       const clientA = createClient(url!, anonKey!);
       await clientA.auth.signInWithPassword({ email: emailA, password: pass });
-      const { error: insertErr } = await clientA
-        .from("weather_history")
-        .insert({ user_id: userA.user.id, location: { name: "Test" }, snapshot: { temp: 25 } });
+      await clientA.from("weather_history").insert({ user_id: userA.user.id, location: { name: "Test" }, snapshot: { temp: 25 } });
       // Insert should succeed for own user_id, or fail if RLS blocks client-supplied user_id (correctly)
       // Either way, B must not see it
 
