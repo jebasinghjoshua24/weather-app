@@ -121,7 +121,7 @@ export function MapView({
         {shelterRoute && shelterRoute.length > 1 && (
           <Polyline positions={shelterRoute} pathOptions={{ color: "#f59e0b", weight: 5, dashArray: "8 10", opacity: 0.9 }} />
         )}
-        {radarPath && radarHost && (
+        {radarPath && radarHost && radarHost.startsWith("https://tilecache.rainviewer.com") && (
           <TileLayer url={`${radarHost}${radarPath}/256/{z}/{x}/{y}/2/1_1.png`} opacity={0.7} attribution='&copy; RainViewer' />
         )}
         <FlyTo lat={lat} lon={lon} />

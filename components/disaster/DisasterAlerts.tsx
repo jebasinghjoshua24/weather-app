@@ -46,7 +46,7 @@ function AlertCard({ ev, onFlyTo }: { ev: EonetEvent; onFlyTo?: (ev: EonetEvent)
       {ev.description && <p className="text-xs text-muted-foreground line-clamp-2">{ev.description}</p>}
       <div className="mt-2 flex gap-2">
         {ev.sources[0]?.url && (
-          <a href={ev.sources[0].url} target="_blank" rel="noreferrer" className="text-xs underline">
+          <a href={ev.sources[0].url} target="_blank" rel="noopener noreferrer" className="text-xs underline">
             Source
           </a>
         )}

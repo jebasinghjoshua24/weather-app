@@ -18,15 +18,15 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               // Scripts: allow self + next.js inline scripts (hashed by Next)
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-inline'",
               // Styles: allow self + inline styles (next.js + tailwind)
               "style-src 'self' 'unsafe-inline'",
               // Images: allow self + OSM tiles + RainViewer + YouTube + Open-Meteo placeholders
               "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tilecache.rainviewer.com https://unpkg.com https://i.ytimg.com https://img.youtube.com https://openstreetmap.org",
               // Fonts: self-hosted via next/font
               "font-src 'self'",
-              // Connect: APIs we talk to directly (open-meteo is direct, not proxied) + HMR ws for dev
-              "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.rainviewer.com https://eonet.gsfc.nasa.gov https://*.supabase.co ws://localhost:3000 ws://127.0.0.1:3000 wss://localhost:3000 wss: ws:",
+              // Connect: APIs we talk to directly (open-meteo is direct, not proxied)
+              "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.rainviewer.com https://eonet.gsfc.nasa.gov https://*.supabase.co wss://*.supabase.co",
               // Frames: no one should embed our app
               "frame-ancestors 'none'",
               "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
@@ -34,10 +34,12 @@ const nextConfig = {
               "worker-src 'self' blob:",
               // Media: for YouTube embeds (if used)
               "media-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+              "object-src 'none'",
               // Base URI: no base tag hijacking
               "base-uri 'self'",
               // Form action: only submit to ourselves
               "form-action 'self'",
+              "upgrade-insecure-requests",
             ].join("; "),
           },
           // Prevent MIME-type sniffing

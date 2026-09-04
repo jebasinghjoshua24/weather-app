@@ -31,15 +31,23 @@ export async function GET(request: Request) {
   const data = (await res.json()) as { events?: unknown[]; title?: string; description?: string; link?: string };
   const events = (Array.isArray(data.events) ? data.events : []) as Array<Record<string, unknown>>;
 
-  // Sanitize + https-guard (like rss:16)
+  // Sanitize + https-guard (like rss:16) — title, description, categories
   const sanitized = events
     .map((ev) => {
       const title = typeof ev.title === "string" ? sanitizeHtml(ev.title, { allowedTags: [], allowedAttributes: {} }).trim() : "";
       if (!title) return null;
+      const description =
+        typeof ev.description === "string" ? sanitizeHtml(ev.description, { allowedTags: [], allowedAttributes: {} }).trim() : null;
+      const categories = Array.isArray(ev.categories)
+        ? (ev.categories as Array<Record<string, unknown>>).map((c) => ({
+            ...c,
+            title: typeof c.title === "string" ? sanitizeHtml(c.title as string, { allowedTags: [], allowedAttributes: {} }).trim() : c.title,
+          }))
+        : ev.categories;
       const sources = Array.isArray(ev.sources)
         ? (ev.sources as Array<Record<string, unknown>>).filter((s) => typeof s.url === "string" && (s.url as string).startsWith("https://"))
         : [];
-      return { ...ev, title, sources };
+      return { ...ev, title, description, categories, sources };
     })
     .filter(Boolean);
 

@@ -46,7 +46,7 @@ export function NewsFeed({ country }: { country?: string | null }) {
             key={it.link}
             href={it.link}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="block rounded p-2 hover:bg-muted"
           >
             <p className="text-sm font-medium leading-tight">{it.title}</p>

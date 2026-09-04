@@ -160,3 +160,11 @@ stable
 as $$
   select auth.uid()
 $$;
+
+-- Harden SECURITY DEFINER functions — revoke PUBLIC execute (F1)
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+grant execute on function public.handle_new_user() to service_role;
+revoke execute on function public.purge_old_weather_history() from public, anon, authenticated;
+grant execute on function public.purge_old_weather_history() to service_role;
+revoke execute on function public.current_user_id() from public, anon, authenticated;
+grant execute on function public.current_user_id() to authenticated, service_role;
